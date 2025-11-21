@@ -175,10 +175,10 @@ const initializeSampleData = () => {
     const sampleVideos = [
       {
         id: 1,
-        title: 'MS Subbulakshmi Sri Venkateswara Suprabhatham | Lyrical Video',
-        description: 'Watch Sri Venkateswara Suprabhatham with lyrics sung by the legendary MS Subbulakshmi.',
-        channelId: 'saregama-telugu',
-        channelName: 'Saregama Telugu',
+        title: 'Big Buck Bunny | Animated Short Film',
+        description: 'Big Buck Bunny is a short animated film featuring a large rabbit and his adventures in a forest.',
+        channelId: 'blender-foundation',
+        channelName: 'Blender Foundation',
         views: 48000000,
         likes: 177000,
         dislikes: 0,
@@ -186,14 +186,14 @@ const initializeSampleData = () => {
         thumbnail: 'https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?w=640&h=360&fit=crop&q=80',
         videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
         createdAt: new Date(Date.now() - 12 * 365 * 24 * 60 * 60 * 1000).toISOString(),
-        tags: ['mssubbulakshmi', 'SriVenkateswaraSuprabhatham', 'saregamatelugu']
+        tags: ['animation', 'short-film', 'blender', 'bunny']
       },
       {
         id: 2,
-        title: 'Vishnu Sahasranamam | Full Version | Powerful Chanting',
-        description: 'Complete Vishnu Sahasranamam chanting with beautiful visuals and clear pronunciation.',
-        channelId: 'saregama-telugu',
-        channelName: 'Saregama Telugu',
+        title: 'Elephants Dream | Animated Short Film',
+        description: 'Elephants Dream is a short animated film about two strange characters exploring a surreal world.',
+        channelId: 'blender-foundation',
+        channelName: 'Blender Foundation',
         views: 12500000,
         likes: 45000,
         dislikes: 0,
@@ -201,14 +201,14 @@ const initializeSampleData = () => {
         thumbnail: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=640&h=360&fit=crop&q=80',
         videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
         createdAt: new Date(Date.now() - 8 * 365 * 24 * 60 * 60 * 1000).toISOString(),
-        tags: ['vishnu', 'sahasranamam', 'chanting', 'devotional']
+        tags: ['animation', 'short-film', 'blender', 'surreal']
       },
       {
         id: 3,
-        title: 'Powerful 1 Hour Maha Mrityunjaya Mantra | Lord Shiva',
-        description: 'Experience the divine power of Maha Mrityunjaya Mantra dedicated to Lord Shiva.',
-        channelId: 'divine-music',
-        channelName: 'Divine Music Channel',
+        title: 'For Bigger Blazes | Sample Video',
+        description: 'A sample video showcasing high-quality video content.',
+        channelId: 'sample-channel',
+        channelName: 'Sample Channel',
         views: 8900000,
         likes: 32000,
         dislikes: 0,
@@ -216,14 +216,14 @@ const initializeSampleData = () => {
         thumbnail: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=640&h=360&fit=crop&q=80',
         videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
         createdAt: new Date(Date.now() - 6 * 365 * 24 * 60 * 60 * 1000).toISOString(),
-        tags: ['shiva', 'mrityunjaya', 'mantra', 'spiritual']
+        tags: ['sample', 'video', 'demo']
       },
       {
         id: 4,
-        title: 'Lalitha Sahasranamam | Complete Stotram | Goddess Lalitha',
-        description: 'Beautiful rendition of Lalitha Sahasranamam, a powerful hymn to Goddess Lalitha.',
-        channelId: 'devotional-classics',
-        channelName: 'Devotional Classics',
+        title: 'For Bigger Escapes | Sample Video',
+        description: 'A sample video demonstrating video playback capabilities.',
+        channelId: 'sample-channel',
+        channelName: 'Sample Channel',
         views: 15600000,
         likes: 67000,
         dislikes: 0,
@@ -231,14 +231,14 @@ const initializeSampleData = () => {
         thumbnail: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=640&h=360&fit=crop&q=80',
         videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
         createdAt: new Date(Date.now() - 4 * 365 * 24 * 60 * 60 * 1000).toISOString(),
-        tags: ['lalitha', 'sahasranamam', 'goddess', 'devotional']
+        tags: ['sample', 'video', 'demo']
       },
       {
         id: 5,
-        title: 'మణిద్వీప వర్ణన | Divine Mani Dweepa Stotram | Powerful Chanting',
-        description: 'Beautiful Telugu devotional song describing the divine Mani Dweepa.',
-        channelId: 'blessful-mornings',
-        channelName: 'Blessful Mornings',
+        title: 'For Bigger Fun | Sample Video',
+        description: 'A fun sample video for testing video playback features.',
+        channelId: 'sample-channel',
+        channelName: 'Sample Channel',
         views: 210000,
         likes: 8500,
         dislikes: 0,
@@ -246,15 +246,15 @@ const initializeSampleData = () => {
         thumbnail: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=640&h=360&fit=crop&q=80',
         videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
         createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-        tags: ['telugu', 'mani', 'dweepa', 'devotional'],
+        tags: ['sample', 'video', 'fun'],
         isNew: true
       },
       {
         id: 6,
-        title: 'లింగాష్టకం - శివాష్టకం - విశ్వనాధాష్టకం - బిల్వాష్టకం',
-        description: 'Powerful collection of Shiva stotrams including Lingashtakam, Shivastakam, and more.',
-        channelId: 'divine-devotional',
-        channelName: 'THE DIVINE - DEVOTIONAL LYRICS',
+        title: 'For Bigger Joyrides | Sample Video',
+        description: 'A sample video showcasing exciting content.',
+        channelId: 'sample-channel',
+        channelName: 'Sample Channel',
         views: 426000,
         likes: 18000,
         dislikes: 0,
@@ -262,14 +262,14 @@ const initializeSampleData = () => {
         thumbnail: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=640&h=360&fit=crop&q=80',
         videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
         createdAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString(),
-        tags: ['shiva', 'lingashtakam', 'telugu', 'stotram']
+        tags: ['sample', 'video', 'demo']
       },
       {
         id: 7,
-        title: 'Rudram Namakam With Lyrics | Powerful Lord Shiva Stotras',
-        description: 'Complete Rudram Namakam chanting with lyrics and translations.',
-        channelId: 'rajshri-soul',
-        channelName: 'Rajshri Soul',
+        title: 'For Bigger Meltdowns | Sample Video',
+        description: 'A sample video demonstrating video streaming capabilities.',
+        channelId: 'sample-channel',
+        channelName: 'Sample Channel',
         views: 13000000,
         likes: 52000,
         dislikes: 0,
@@ -277,14 +277,14 @@ const initializeSampleData = () => {
         thumbnail: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=640&h=360&fit=crop&q=80',
         videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
         createdAt: new Date(Date.now() - 7 * 365 * 24 * 60 * 60 * 1000).toISOString(),
-        tags: ['rudram', 'namakam', 'shiva', 'vedic']
+        tags: ['sample', 'video', 'demo']
       },
       {
         id: 8,
-        title: 'Gayatri Mantra | 108 Times | Powerful Meditation',
-        description: 'Experience the transformative power of Gayatri Mantra repeated 108 times.',
-        channelId: 'divine-music',
-        channelName: 'Divine Music Channel',
+        title: 'Sintel | Animated Short Film',
+        description: 'Sintel is an animated short film about a young girl searching for a baby dragon.',
+        channelId: 'blender-foundation',
+        channelName: 'Blender Foundation',
         views: 5600000,
         likes: 24000,
         dislikes: 0,
@@ -292,14 +292,14 @@ const initializeSampleData = () => {
         thumbnail: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=640&h=360&fit=crop&q=80',
         videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
         createdAt: new Date(Date.now() - 3 * 365 * 24 * 60 * 60 * 1000).toISOString(),
-        tags: ['gayatri', 'mantra', 'meditation', 'spiritual']
+        tags: ['animation', 'short-film', 'blender', 'dragon']
       },
       {
         id: 9,
-        title: 'Venkateswara Suprabhatam | Morning Prayers | Tirumala',
-        description: 'Beautiful morning prayers to Lord Venkateswara from Tirumala.',
-        channelId: 'tirumala-vaibhavam',
-        channelName: 'Tirumala Vaibhavam',
+        title: 'Subaru Outback | On Street and Dirt',
+        description: 'A video showcasing the Subaru Outback vehicle on various terrains.',
+        channelId: 'automotive-channel',
+        channelName: 'Automotive Channel',
         views: 76000,
         likes: 3200,
         dislikes: 0,
@@ -307,14 +307,14 @@ const initializeSampleData = () => {
         thumbnail: 'https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?w=640&h=360&fit=crop&q=80',
         videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4',
         createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
-        tags: ['venkateswara', 'suprabhatam', 'tirumala', 'morning']
+        tags: ['automotive', 'subaru', 'outback', 'vehicle']
       },
       {
         id: 10,
-        title: 'Hanuman Chalisa | Complete | Powerful Devotional Song',
-        description: 'Complete Hanuman Chalisa with beautiful music and clear pronunciation.',
-        channelId: 'devotional-classics',
-        channelName: 'Devotional Classics',
+        title: 'Tears of Steel | Sci-Fi Short Film',
+        description: 'Tears of Steel is a science fiction short film featuring robots and futuristic technology.',
+        channelId: 'blender-foundation',
+        channelName: 'Blender Foundation',
         views: 25000000,
         likes: 98000,
         dislikes: 0,
@@ -322,7 +322,7 @@ const initializeSampleData = () => {
         thumbnail: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=640&h=360&fit=crop&q=80',
         videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
         createdAt: new Date(Date.now() - 5 * 365 * 24 * 60 * 60 * 1000).toISOString(),
-        tags: ['hanuman', 'chalisa', 'devotional', 'hindi']
+        tags: ['sci-fi', 'short-film', 'blender', 'robots']
       }
     ];
 
@@ -330,15 +330,24 @@ const initializeSampleData = () => {
     const existingIds = new Set(videosData.videos.map(v => v.id));
     const videosToAdd = sampleVideos.filter(v => !existingIds.has(v.id));
     
-    // Update thumbnails for existing videos
-    const thumbnailMap = {};
+    // Update thumbnails and titles for existing videos
+    const videoMap = {};
     sampleVideos.forEach(v => {
-      thumbnailMap[v.id] = v.thumbnail;
+      videoMap[v.id] = v;
     });
     
     videosData.videos.forEach(video => {
-      if (thumbnailMap[video.id] && (!video.thumbnail || video.thumbnail.trim() === '')) {
-        video.thumbnail = thumbnailMap[video.id];
+      if (videoMap[video.id]) {
+        // Update thumbnail if missing
+        if (!video.thumbnail || video.thumbnail.trim() === '') {
+          video.thumbnail = videoMap[video.id].thumbnail;
+        }
+        // Update title and description to match actual video content
+        video.title = videoMap[video.id].title;
+        video.description = videoMap[video.id].description;
+        video.channelId = videoMap[video.id].channelId;
+        video.channelName = videoMap[video.id].channelName;
+        video.tags = videoMap[video.id].tags;
       }
     });
     
