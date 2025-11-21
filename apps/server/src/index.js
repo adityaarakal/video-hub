@@ -170,9 +170,8 @@ const initializeSampleData = () => {
     fs.writeFileSync(channelsPath, JSON.stringify(channelsData, null, 2));
   }
 
-  // Add sample videos if empty or less than 10
-  if (videosData.videos.length < 10) {
-    const sampleVideos = [
+  // Always update videos with correct titles and thumbnails
+  const sampleVideos = [
       {
         id: 1,
         title: 'Big Buck Bunny | Animated Short Film',
@@ -330,34 +329,34 @@ const initializeSampleData = () => {
     const existingIds = new Set(videosData.videos.map(v => v.id));
     const videosToAdd = sampleVideos.filter(v => !existingIds.has(v.id));
     
-    // Update thumbnails and titles for existing videos
+    // Update thumbnails and titles for existing videos - ALWAYS update
     const videoMap = {};
     sampleVideos.forEach(v => {
       videoMap[v.id] = v;
     });
     
+    // Update ALL existing videos with correct data
     videosData.videos.forEach(video => {
       if (videoMap[video.id]) {
-        // Update thumbnail if missing
-        if (!video.thumbnail || video.thumbnail.trim() === '') {
-          video.thumbnail = videoMap[video.id].thumbnail;
-        }
-        // Update title and description to match actual video content
+        // Always update all fields to match sample data
         video.title = videoMap[video.id].title;
         video.description = videoMap[video.id].description;
         video.channelId = videoMap[video.id].channelId;
         video.channelName = videoMap[video.id].channelName;
         video.tags = videoMap[video.id].tags;
+        video.thumbnail = videoMap[video.id].thumbnail; // Always update thumbnail
       }
     });
     
+    // Add new videos if they don't exist
     if (videosToAdd.length > 0) {
       videosData.videos.push(...videosToAdd);
       videosData.nextId = Math.max(...sampleVideos.map(v => v.id)) + 1;
     }
     
-    // Always save to ensure thumbnails are updated
+    // Always save to ensure all videos are updated
     fs.writeFileSync(videosPath, JSON.stringify(videosData, null, 2));
+    console.log(`✅ Updated ${videosData.videos.length} videos with correct titles and thumbnails`);
   }
 };
 
