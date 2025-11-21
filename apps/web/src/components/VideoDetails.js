@@ -33,7 +33,6 @@ const VideoDetails = ({ video }) => {
     id: video?.id,
     title: video?.title,
     channel: channelName,
-    channelId: channelId,
     thumbnail: video?.thumbnail
   };
 
