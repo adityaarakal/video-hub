@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Database = require('../utils/database');
 const { requireAdmin } = require('../middleware/auth');
-const { asyncHandler } = require('../middleware/errorHandler');
+const { asyncHandler } = require('../middleware/validation');
 
 const videoDb = new Database('videos');
 const commentDb = new Database('comments');

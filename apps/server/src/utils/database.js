@@ -1,33 +1,45 @@
 const fs = require('fs');
 const path = require('path');
 
+const USE_MONGODB = process.env.USE_MONGODB !== 'false'; // Default to true
+
 const dataDir = path.join(__dirname, '../../data');
+
+// Import MongoDB database if available
+let MongoDBDatabase;
+try {
+  MongoDBDatabase = require('./mongodb');
+} catch (error) {
+  console.warn('MongoDB database not available, using JSON files');
+}
 
 class Database {
   constructor(fileName) {
-    this.filePath = path.join(dataDir, `${fileName}.json`);
-  }
-
-  read() {
-    try {
-      const data = fs.readFileSync(this.filePath, 'utf8');
-      return JSON.parse(data);
-    } catch (error) {
-      return null;
+    this.fileName = fileName;
+    
+    // Use MongoDB if enabled and available, otherwise use JSON files
+    if (USE_MONGODB && MongoDBDatabase) {
+      try {
+        this.mongoDb = new MongoDBDatabase(fileName);
+        this.useMongoDB = true;
+      } catch (error) {
+        console.warn(`Failed to initialize MongoDB for ${fileName}, falling back to JSON:`, error.message);
+        this.useMongoDB = false;
+        this.filePath = path.join(dataDir, `${fileName}.json`);
+      }
+    } else {
+      this.useMongoDB = false;
+      this.filePath = path.join(dataDir, `${fileName}.json`);
     }
   }
 
-  write(data) {
-    try {
-      fs.writeFileSync(this.filePath, JSON.stringify(data, null, 2));
-      return true;
-    } catch (error) {
-      console.error(`Error writing to ${this.filePath}:`, error);
-      return false;
+  // MongoDB methods
+  async getAll() {
+    if (this.useMongoDB) {
+      return await this.mongoDb.getAll();
     }
-  }
-
-  getAll() {
+    
+    // JSON file methods
     const data = this.read();
     if (!data) return [];
     
@@ -43,33 +55,33 @@ class Database {
     return [];
   }
 
-  getNextId() {
-    const data = this.read();
-    if (data && data.nextId) {
-      const nextId = data.nextId;
-      data.nextId += 1;
-      this.write(data);
-      return nextId;
+  async findById(id) {
+    if (this.useMongoDB) {
+      return await this.mongoDb.findById(id);
     }
-    return null;
-  }
-
-  findById(id) {
-    const items = this.getAll();
-    // Handle both string and number ID comparisons
+    
+    const items = await this.getAll();
     const searchId = String(id);
     return items.find(item => {
-      const itemId = String(item.id);
+      const itemId = String(item.id || item._id);
       return itemId === searchId;
     });
   }
 
-  findBy(field, value) {
-    const items = this.getAll();
+  async findBy(field, value) {
+    if (this.useMongoDB) {
+      return await this.mongoDb.findBy(field, value);
+    }
+    
+    const items = await this.getAll();
     return items.filter(item => item[field] === value);
   }
 
-  create(item) {
+  async create(item) {
+    if (this.useMongoDB) {
+      return await this.mongoDb.create(item);
+    }
+    
     const data = this.read();
     if (!data) return null;
 
@@ -99,13 +111,20 @@ class Database {
     return newItem;
   }
 
-  update(id, updates) {
+  async update(id, updates) {
+    if (this.useMongoDB) {
+      return await this.mongoDb.update(id, updates);
+    }
+    
     const data = this.read();
     if (!data) return null;
 
-    let items = this.getAll();
+    let items = await this.getAll();
     const searchId = String(id);
-    const index = items.findIndex(item => String(item.id) === searchId);
+    const index = items.findIndex(item => {
+      const itemId = String(item.id || item._id);
+      return itemId === searchId;
+    });
     
     if (index === -1) return null;
 
@@ -131,13 +150,20 @@ class Database {
     return updatedItem;
   }
 
-  delete(id) {
+  async delete(id) {
+    if (this.useMongoDB) {
+      return await this.mongoDb.delete(id);
+    }
+    
     const data = this.read();
     if (!data) return false;
 
-    let items = this.getAll();
+    let items = await this.getAll();
     const searchId = String(id);
-    const filtered = items.filter(item => String(item.id) !== searchId);
+    const filtered = items.filter(item => {
+      const itemId = String(item.id || item._id);
+      return itemId !== searchId;
+    });
     
     if (filtered.length === items.length) return false;
 
@@ -148,7 +174,6 @@ class Database {
     else if (data.playlists) data.playlists = filtered;
     else if (data.users) data.users = filtered;
     else if (Array.isArray(data)) {
-      // For arrays, replace the entire array
       const newData = filtered;
       this.write(newData);
       return true;
@@ -157,7 +182,37 @@ class Database {
     this.write(data);
     return true;
   }
+
+  // JSON file methods (for fallback)
+  read() {
+    try {
+      const data = fs.readFileSync(this.filePath, 'utf8');
+      return JSON.parse(data);
+    } catch (error) {
+      return null;
+    }
+  }
+
+  write(data) {
+    try {
+      fs.writeFileSync(this.filePath, JSON.stringify(data, null, 2));
+      return true;
+    } catch (error) {
+      console.error(`Error writing to ${this.filePath}:`, error);
+      return false;
+    }
+  }
+
+  getNextId() {
+    const data = this.read();
+    if (data && data.nextId) {
+      const nextId = data.nextId;
+      data.nextId += 1;
+      this.write(data);
+      return nextId;
+    }
+    return null;
+  }
 }
 
 module.exports = Database;
-

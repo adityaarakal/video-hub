@@ -3,7 +3,9 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
 const fs = require('fs');
+const mongoose = require('mongoose');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
+const { connectDB } = require('./config/database');
 
 // Import routes
 const videoRoutes = require('./routes/videos');
@@ -358,14 +360,35 @@ app.use(notFoundHandler);
 // Global error handler (must be last)
 app.use(errorHandler);
 
-// Initialize database
-initDatabase();
+// Connect to MongoDB or initialize JSON database
+const USE_MONGODB = process.env.USE_MONGODB !== 'false'; // Default to true
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 VideoHub Server running on http://localhost:${PORT}`);
-  console.log(`📁 Data directory: ${dataDir}`);
-});
+if (USE_MONGODB) {
+  connectDB()
+    .then(() => {
+      console.log('✅ Using MongoDB database');
+      startServer();
+    })
+    .catch(err => {
+      console.error('❌ Failed to connect to MongoDB:', err.message);
+      console.log('📁 Falling back to JSON file storage');
+      initDatabase();
+      startServer();
+    });
+} else {
+  console.log('📁 Using JSON file storage');
+  initDatabase();
+  startServer();
+}
+
+function startServer() {
+  app.listen(PORT, () => {
+    console.log(`🚀 VideoHub Server running on http://localhost:${PORT}`);
+    if (!USE_MONGODB || !mongoose.connection.readyState) {
+      console.log(`📁 Data directory: ${dataDir}`);
+    }
+  });
+}
 
 module.exports = app;
 
