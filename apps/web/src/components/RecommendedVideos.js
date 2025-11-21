@@ -205,7 +205,7 @@ const RecommendedVideos = ({ currentVideoId }) => {
   };
 
   const handleVideoClick = (videoId) => {
-    navigate(`/?v=${videoId}`);
+    navigate(`/watch?v=${videoId}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -215,7 +215,7 @@ const RecommendedVideos = ({ currentVideoId }) => {
   };
 
   const handleQuickVideoClick = (videoId) => {
-    navigate(`/?v=${videoId}`);
+    navigate(`/watch?v=${videoId}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

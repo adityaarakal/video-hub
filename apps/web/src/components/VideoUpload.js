@@ -114,7 +114,7 @@ const VideoUpload = ({ onClose }) => {
       
       setTimeout(() => {
         onClose();
-        navigate(`/?v=${newVideo.id}`);
+        navigate(`/watch?v=${newVideo.id}`);
       }, 1000);
     } catch (error) {
       console.error('Upload error:', error);

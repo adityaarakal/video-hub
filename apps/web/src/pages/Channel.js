@@ -120,7 +120,7 @@ const Channel = () => {
   };
 
   const handleVideoClick = (videoId) => {
-    navigate(`/?v=${videoId}`);
+    navigate(`/watch?v=${videoId}`);
   };
 
   const handlePageChange = (page) => {

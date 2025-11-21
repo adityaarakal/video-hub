@@ -93,7 +93,7 @@ const RelatedVideos = ({ videoId, channelId }) => {
           <div
             key={video.id}
             className="related-video-card"
-            onClick={() => navigate(`/?v=${video.id}`)}
+            onClick={() => navigate(`/watch?v=${video.id}`)}
           >
             <div className="related-video-thumbnail">
               {video.thumbnail && video.thumbnail.trim() !== '' ? (

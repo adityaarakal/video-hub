@@ -4,7 +4,8 @@ import { AppProvider, useApp } from './context/AppContext';
 import { ToastProvider } from './context/ToastContext';
 import Header from './components/Header';
 import ErrorBoundary from './components/ErrorBoundary';
-import Home from './pages/Home';
+import HomePage from './pages/HomePage';
+import Watch from './pages/Watch';
 import SearchResults from './pages/SearchResults';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -34,7 +35,8 @@ function App() {
               <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/" element={<Home />} />
+                <Route path="/" element={<HomePage />} />
+                <Route path="/watch" element={<Watch />} />
                 <Route path="/search" element={<SearchResults />} />
                 <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
               </Routes>

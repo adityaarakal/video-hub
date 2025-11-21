@@ -71,7 +71,7 @@ const SearchResults = () => {
   };
 
   const handleVideoClick = (video) => {
-    navigate(`/?v=${video.id}`);
+    navigate(`/watch?v=${video.id}`);
   };
 
   const handlePageChange = (page) => {
