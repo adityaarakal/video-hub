@@ -183,7 +183,7 @@ const initializeSampleData = () => {
         likes: 177000,
         dislikes: 0,
         duration: 1241,
-        thumbnail: '',
+        thumbnail: 'https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?w=640&h=360&fit=crop&q=80',
         videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
         createdAt: new Date(Date.now() - 12 * 365 * 24 * 60 * 60 * 1000).toISOString(),
         tags: ['mssubbulakshmi', 'SriVenkateswaraSuprabhatham', 'saregamatelugu']
@@ -198,7 +198,7 @@ const initializeSampleData = () => {
         likes: 45000,
         dislikes: 0,
         duration: 3657,
-        thumbnail: '',
+        thumbnail: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=640&h=360&fit=crop&q=80',
         videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
         createdAt: new Date(Date.now() - 8 * 365 * 24 * 60 * 60 * 1000).toISOString(),
         tags: ['vishnu', 'sahasranamam', 'chanting', 'devotional']
@@ -213,7 +213,7 @@ const initializeSampleData = () => {
         likes: 32000,
         dislikes: 0,
         duration: 3600,
-        thumbnail: '',
+        thumbnail: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=640&h=360&fit=crop&q=80',
         videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
         createdAt: new Date(Date.now() - 6 * 365 * 24 * 60 * 60 * 1000).toISOString(),
         tags: ['shiva', 'mrityunjaya', 'mantra', 'spiritual']
@@ -228,7 +228,7 @@ const initializeSampleData = () => {
         likes: 67000,
         dislikes: 0,
         duration: 2850,
-        thumbnail: '',
+        thumbnail: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=640&h=360&fit=crop&q=80',
         videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
         createdAt: new Date(Date.now() - 4 * 365 * 24 * 60 * 60 * 1000).toISOString(),
         tags: ['lalitha', 'sahasranamam', 'goddess', 'devotional']
@@ -243,7 +243,7 @@ const initializeSampleData = () => {
         likes: 8500,
         dislikes: 0,
         duration: 916,
-        thumbnail: '',
+        thumbnail: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=640&h=360&fit=crop&q=80',
         videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
         createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
         tags: ['telugu', 'mani', 'dweepa', 'devotional'],
@@ -259,7 +259,7 @@ const initializeSampleData = () => {
         likes: 18000,
         dislikes: 0,
         duration: 3083,
-        thumbnail: '',
+        thumbnail: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=640&h=360&fit=crop&q=80',
         videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
         createdAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString(),
         tags: ['shiva', 'lingashtakam', 'telugu', 'stotram']
@@ -274,7 +274,7 @@ const initializeSampleData = () => {
         likes: 52000,
         dislikes: 0,
         duration: 3711,
-        thumbnail: '',
+        thumbnail: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=640&h=360&fit=crop&q=80',
         videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
         createdAt: new Date(Date.now() - 7 * 365 * 24 * 60 * 60 * 1000).toISOString(),
         tags: ['rudram', 'namakam', 'shiva', 'vedic']
@@ -289,7 +289,7 @@ const initializeSampleData = () => {
         likes: 24000,
         dislikes: 0,
         duration: 1800,
-        thumbnail: '',
+        thumbnail: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=640&h=360&fit=crop&q=80',
         videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
         createdAt: new Date(Date.now() - 3 * 365 * 24 * 60 * 60 * 1000).toISOString(),
         tags: ['gayatri', 'mantra', 'meditation', 'spiritual']
@@ -304,7 +304,7 @@ const initializeSampleData = () => {
         likes: 3200,
         dislikes: 0,
         duration: 3717,
-        thumbnail: '',
+        thumbnail: 'https://images.unsplash.com/photo-1606092195730-5d7b9af1efc5?w=640&h=360&fit=crop&q=80',
         videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4',
         createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
         tags: ['venkateswara', 'suprabhatam', 'tirumala', 'morning']
@@ -319,22 +319,36 @@ const initializeSampleData = () => {
         likes: 98000,
         dislikes: 0,
         duration: 1200,
-        thumbnail: '',
+        thumbnail: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=640&h=360&fit=crop&q=80',
         videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
         createdAt: new Date(Date.now() - 5 * 365 * 24 * 60 * 60 * 1000).toISOString(),
         tags: ['hanuman', 'chalisa', 'devotional', 'hindi']
       }
     ];
 
-    // Only add videos that don't exist
+    // Update existing videos with thumbnails if missing, or add new ones
     const existingIds = new Set(videosData.videos.map(v => v.id));
     const videosToAdd = sampleVideos.filter(v => !existingIds.has(v.id));
+    
+    // Update thumbnails for existing videos
+    const thumbnailMap = {};
+    sampleVideos.forEach(v => {
+      thumbnailMap[v.id] = v.thumbnail;
+    });
+    
+    videosData.videos.forEach(video => {
+      if (thumbnailMap[video.id] && (!video.thumbnail || video.thumbnail.trim() === '')) {
+        video.thumbnail = thumbnailMap[video.id];
+      }
+    });
     
     if (videosToAdd.length > 0) {
       videosData.videos.push(...videosToAdd);
       videosData.nextId = Math.max(...sampleVideos.map(v => v.id)) + 1;
-      fs.writeFileSync(videosPath, JSON.stringify(videosData, null, 2));
     }
+    
+    // Always save to ensure thumbnails are updated
+    fs.writeFileSync(videosPath, JSON.stringify(videosData, null, 2));
   }
 };
 
