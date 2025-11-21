@@ -1,0 +1,30 @@
+{
+  "name": "videohub-monorepo",
+  "version": "1.0.0",
+  "description": "VideoHub monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "start": "npm run start --workspace=@videohub/web",
+    "dev": "npm run start --workspace=@videohub/web",
+    "build": "npm run build --workspace=@videohub/web",
+    "test": "npm run test --workspace=@videohub/web",
+    "build:all": "npm run build --workspaces",
+    "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules",
+    "install:all": "npm install"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "."
+  },
+  "author": "",
+  "license": "ISC"
+}

@@ -1,0 +1,15 @@
+{
+  "name": "@videohub/shared",
+  "version": "1.0.0",
+  "description": "Shared utilities and components for VideoHub",
+  "private": true,
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "build": "echo 'No build step required'",
+    "test": "echo 'No tests specified'"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
+

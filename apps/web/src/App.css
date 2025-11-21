@@ -1,0 +1,36 @@
+.app {
+  min-height: 100vh;
+  background-color: #0a0e27;
+}
+
+.watch-container {
+  display: flex;
+  max-width: 100%;
+  padding-top: 80px;
+  margin: 0 auto;
+  gap: 32px;
+  padding-left: 32px;
+  padding-right: 32px;
+}
+
+.primary-column {
+  flex: 1;
+  min-width: 0;
+  max-width: 1280px;
+}
+
+.secondary-column {
+  width: 402px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 1312px) {
+  .watch-container {
+    flex-direction: column;
+  }
+  
+  .secondary-column {
+    width: 100%;
+  }
+}
+
