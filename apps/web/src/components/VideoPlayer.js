@@ -201,6 +201,10 @@ const VideoPlayer = ({ video }) => {
     const handleEnded = () => {
       setIsPlaying(false);
       setCurrentTime(0);
+      // Trigger video ended event for history tracking
+      document.dispatchEvent(new CustomEvent('videoEnded', { 
+        detail: { videoId: video?.id, watchedDuration: duration } 
+      }));
     };
 
     videoElement.addEventListener('timeupdate', updateTime);

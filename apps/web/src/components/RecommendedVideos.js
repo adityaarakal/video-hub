@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import './RecommendedVideos.css';
@@ -9,6 +9,8 @@ const RecommendedVideos = ({ currentVideoId }) => {
   const [hoveredVideo, setHoveredVideo] = useState(null);
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [previewVideo, setPreviewVideo] = useState(null);
+  const previewTimeoutRef = React.useRef(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -211,8 +213,19 @@ const RecommendedVideos = ({ currentVideoId }) => {
           key={video.id} 
           className="video-card"
           onClick={() => handleVideoClick(video.id)}
-          onMouseEnter={() => setHoveredVideo(video.id)}
-          onMouseLeave={() => setHoveredVideo(null)}
+          onMouseEnter={() => {
+            setHoveredVideo(video.id);
+            previewTimeoutRef.current = setTimeout(() => {
+              setPreviewVideo(video);
+            }, 500);
+          }}
+          onMouseLeave={() => {
+            setHoveredVideo(null);
+            if (previewTimeoutRef.current) {
+              clearTimeout(previewTimeoutRef.current);
+            }
+            setTimeout(() => setPreviewVideo(null), 200);
+          }}
         >
           <div className="video-thumbnail">
             {video.thumbnail ? (
