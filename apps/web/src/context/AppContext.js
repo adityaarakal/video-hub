@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
 
 const AppContext = createContext();
@@ -67,7 +67,7 @@ export const AppProvider = ({ children }) => {
     localStorage.setItem('videohub_preferences', JSON.stringify(userPreferences));
   }, [userPreferences]);
 
-  const addToHistory = async (video) => {
+  const addToHistory = useCallback(async (video) => {
     if (!user) return;
     
     try {
@@ -83,9 +83,9 @@ export const AppProvider = ({ children }) => {
     } catch (error) {
       console.error('Failed to add to history:', error);
     }
-  };
+  }, [user]);
 
-  const addToPlaylist = async (playlistId, video) => {
+  const addToPlaylist = useCallback(async (playlistId, video) => {
     if (!user) return;
     
     try {
@@ -101,9 +101,9 @@ export const AppProvider = ({ children }) => {
     } catch (error) {
       console.error('Failed to add to playlist:', error);
     }
-  };
+  }, [user]);
 
-  const removeFromPlaylist = async (playlistId, videoId) => {
+  const removeFromPlaylist = useCallback(async (playlistId, videoId) => {
     if (!user) return;
     
     try {
@@ -115,9 +115,9 @@ export const AppProvider = ({ children }) => {
     } catch (error) {
       console.error('Failed to remove from playlist:', error);
     }
-  };
+  }, [user]);
 
-  const createPlaylist = async (name) => {
+  const createPlaylist = useCallback(async (name) => {
     if (!user) return null;
     
     try {
@@ -136,14 +136,14 @@ export const AppProvider = ({ children }) => {
       console.error('Failed to create playlist:', error);
       return null;
     }
-  };
+  }, [user]);
 
 
-  const updatePreferences = (prefs) => {
+  const updatePreferences = useCallback((prefs) => {
     setUserPreferences(prev => ({ ...prev, ...prefs }));
-  };
+  }, []);
 
-  const searchVideos = async (query) => {
+  const searchVideos = useCallback(async (query) => {
     setIsLoading(true);
     try {
       const results = await api.search(query, 'videos', 20);
@@ -157,20 +157,20 @@ export const AppProvider = ({ children }) => {
       setIsLoading(false);
       return [];
     }
-  };
+  }, []);
 
-  const login = (userData) => {
+  const login = useCallback((userData) => {
     setUser(userData);
     localStorage.setItem('videohub_user', JSON.stringify(userData));
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null);
     setWatchHistory([]);
     setPlaylists([]);
     localStorage.removeItem('videohub_user');
     api.logout();
-  };
+  }, []);
 
   const value = {
     user,

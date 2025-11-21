@@ -100,7 +100,8 @@ const Watch = () => {
     return () => {
       isMounted = false;
     };
-  }, [searchParams.get('v'), user?.id, navigate, setCurrentVideo, addToHistory, showError]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams.get('v'), user?.id]);
 
   if (loading) {
     return (
