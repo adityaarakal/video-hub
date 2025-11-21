@@ -19,7 +19,6 @@ export const AppProvider = ({ children }) => {
 
   const [watchHistory, setWatchHistory] = useState([]);
   const [playlists, setPlaylists] = useState([]);
-  const [subscriptions, setSubscriptions] = useState([]);
   const [userPreferences, setUserPreferences] = useState(() => {
     const saved = localStorage.getItem('videohub_preferences');
     return saved ? JSON.parse(saved) : {
@@ -51,10 +50,6 @@ export const AppProvider = ({ children }) => {
         const playlistsData = await api.getPlaylists(user.id);
         if (!isMounted) return;
         setPlaylists(playlistsData.playlists || []);
-
-        // Load subscriptions
-        const subsData = await api.getUserSubscriptions(user.id);
-        setSubscriptions(subsData.subscriptions || []);
       } catch (error) {
         console.error('Failed to load user data:', error);
       }
@@ -143,33 +138,6 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  const subscribe = async (channelId, channelName) => {
-    if (!user) return;
-    
-    try {
-      await api.subscribeToChannel(channelId, user.id);
-      
-      // Update local state
-      const subsData = await api.getUserSubscriptions(user.id);
-      setSubscriptions(subsData.subscriptions || []);
-    } catch (error) {
-      console.error('Failed to subscribe:', error);
-    }
-  };
-
-  const unsubscribe = async (channelId) => {
-    if (!user) return;
-    
-    try {
-      await api.unsubscribeFromChannel(channelId, user.id);
-      
-      // Update local state
-      const subsData = await api.getUserSubscriptions(user.id);
-      setSubscriptions(subsData.subscriptions || []);
-    } catch (error) {
-      console.error('Failed to unsubscribe:', error);
-    }
-  };
 
   const updatePreferences = (prefs) => {
     setUserPreferences(prev => ({ ...prev, ...prefs }));
@@ -200,7 +168,6 @@ export const AppProvider = ({ children }) => {
     setUser(null);
     setWatchHistory([]);
     setPlaylists([]);
-    setSubscriptions([]);
     localStorage.removeItem('videohub_user');
     api.logout();
   };
@@ -209,7 +176,6 @@ export const AppProvider = ({ children }) => {
     user,
     watchHistory,
     playlists,
-    subscriptions,
     userPreferences,
     currentVideo,
     searchResults,
@@ -219,8 +185,6 @@ export const AppProvider = ({ children }) => {
     addToPlaylist,
     removeFromPlaylist,
     createPlaylist,
-    subscribe,
-    unsubscribe,
     updatePreferences,
     searchVideos,
     setSearchResults,

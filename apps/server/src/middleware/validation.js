@@ -28,13 +28,13 @@ const validateVideo = [
     .trim()
     .isLength({ max: 5000 }).withMessage('Description must be less than 5000 characters'),
   body('channelId')
+    .optional()
     .trim()
-    .notEmpty().withMessage('Channel ID is required')
-    .isLength({ min: 1, max: 100 }).withMessage('Channel ID must be between 1 and 100 characters'),
+    .isLength({ max: 100 }).withMessage('Channel ID must not exceed 100 characters'),
   body('channelName')
+    .optional()
     .trim()
-    .notEmpty().withMessage('Channel name is required')
-    .isLength({ min: 1, max: 100 }).withMessage('Channel name must be between 1 and 100 characters'),
+    .isLength({ max: 100 }).withMessage('Channel name must not exceed 100 characters'),
   body('duration')
     .optional()
     .isInt({ min: 0 }).withMessage('Duration must be a non-negative integer'),

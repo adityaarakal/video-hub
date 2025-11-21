@@ -6,7 +6,6 @@ import Header from './components/Header';
 import ErrorBoundary from './components/ErrorBoundary';
 import Home from './pages/Home';
 import SearchResults from './pages/SearchResults';
-import Channel from './pages/Channel';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Admin from './pages/Admin';
@@ -37,7 +36,6 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/" element={<Home />} />
                 <Route path="/search" element={<SearchResults />} />
-                <Route path="/channel/:channelId" element={<Channel />} />
                 <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
               </Routes>
             </div>

@@ -90,7 +90,7 @@ router.get('/:id', asyncHandler(async (req, res) => {
   res.json(video);
 }));
 
-// POST /api/videos - Create new video
+// POST /api/videos - Create new video (admin only)
 router.post('/', validateVideo, asyncHandler(async (req, res) => {
   const {
     title,
@@ -103,18 +103,22 @@ router.post('/', validateVideo, asyncHandler(async (req, res) => {
     tags = []
   } = req.body;
 
+  // Use admin as default channel if not provided
+  const finalChannelId = (channelId || 'admin').trim();
+  const finalChannelName = (channelName || 'Admin').trim();
+
   const video = await videoDb.create({
     title: title.trim(),
     description: (description || '').trim(),
-    channelId: channelId.trim(),
-    channelName: channelName.trim(),
+    channelId: finalChannelId,
+    channelName: finalChannelName,
     views: 0,
     likes: 0,
     dislikes: 0,
     duration: duration || 0,
     thumbnail: (thumbnail || '').trim(),
     videoUrl: (videoUrl || '').trim(),
-    tags: Array.isArray(tags) ? tags : [],
+    tags: Array.isArray(tags) ? tags : (tags ? tags.split(',').map(t => t.trim()).filter(t => t) : []),
     createdAt: new Date().toISOString()
   });
 

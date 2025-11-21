@@ -8,42 +8,26 @@ import { ThumbsUp, ThumbsDown, Share2, Download, Scissors, MoreVertical, CheckCi
 
 const VideoDetails = ({ video }) => {
   const navigate = useNavigate();
-  const { user, playlists, subscriptions, addToPlaylist, subscribe, unsubscribe, createPlaylist } = useApp();
+  const { user, playlists, addToPlaylist, createPlaylist } = useApp();
   const { info: showInfo, success: showSuccess, warning: showWarning, error: showError } = useToast();
   const [newPlaylistName, setNewPlaylistName] = useState('');
   const [showCreatePlaylistInput, setShowCreatePlaylistInput] = useState(false);
   const [likes, setLikes] = useState(video?.likes || 0);
   const [isLiked, setIsLiked] = useState(false);
   const [isDisliked, setIsDisliked] = useState(false);
-  const [isSubscribed, setIsSubscribed] = useState(false);
   const [showDescription, setShowDescription] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showPlaylistMenu, setShowPlaylistMenu] = useState(false);
   const [copied, setCopied] = useState(false);
   
-  const channelId = video?.channelId || 'saregama-telugu';
-  const channelName = video?.channelName || 'Saregama Telugu';
+  const channelName = video?.channelName || 'Admin';
   
   useEffect(() => {
     if (video) {
       setLikes(video.likes || 0);
     }
   }, [video]);
-
-  useEffect(() => {
-    const checkSubscription = async () => {
-      if (user && channelId) {
-        try {
-          const result = await api.checkSubscription(channelId, user.id);
-          setIsSubscribed(result.subscribed || false);
-        } catch (error) {
-          console.error('Failed to check subscription:', error);
-        }
-      }
-    };
-    checkSubscription();
-  }, [user, channelId]);
   
   const currentVideo = {
     id: video?.id,
