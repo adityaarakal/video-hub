@@ -363,20 +363,27 @@ app.use(errorHandler);
 // Connect to MongoDB or initialize JSON database
 const USE_MONGODB = process.env.USE_MONGODB !== 'false'; // Default to true
 
+// Set USE_MONGODB to false if MongoDB connection fails
+let useMongoDB = USE_MONGODB;
+
 if (USE_MONGODB) {
   connectDB()
     .then(() => {
       console.log('✅ Using MongoDB database');
+      process.env.USE_MONGODB = 'true';
       startServer();
     })
     .catch(err => {
       console.error('❌ Failed to connect to MongoDB:', err.message);
       console.log('📁 Falling back to JSON file storage');
+      process.env.USE_MONGODB = 'false';
+      useMongoDB = false;
       initDatabase();
       startServer();
     });
 } else {
   console.log('📁 Using JSON file storage');
+  process.env.USE_MONGODB = 'false';
   initDatabase();
   startServer();
 }
