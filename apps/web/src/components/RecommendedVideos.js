@@ -8,6 +8,7 @@ const RecommendedVideos = ({ currentVideoId }) => {
   const navigate = useNavigate();
   const [hoveredVideo, setHoveredVideo] = useState(null);
   const [videos, setVideos] = useState([]);
+  const [quickVideos, setQuickVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [previewVideo, setPreviewVideo] = useState(null);
   const previewTimeoutRef = React.useRef(null);
@@ -65,6 +66,41 @@ const RecommendedVideos = ({ currentVideoId }) => {
       isMounted = false;
     };
   }, [currentVideoId]);
+
+  // Load quick videos data
+  useEffect(() => {
+    let isMounted = true;
+    
+    const loadQuickVideos = async () => {
+      try {
+        const quickVideoIds = [1, 2, 3];
+        const quickVideosData = await Promise.all(
+          quickVideoIds.map(async (id) => {
+            try {
+              const video = await api.getVideo(id);
+              return video;
+            } catch (error) {
+              console.error(`Failed to load quick video ${id}:`, error);
+              return null;
+            }
+          })
+        );
+        
+        if (!isMounted) return;
+        
+        const validQuickVideos = quickVideosData.filter(v => v !== null);
+        setQuickVideos(validQuickVideos);
+      } catch (error) {
+        console.error('Failed to load quick videos:', error);
+      }
+    };
+
+    loadQuickVideos();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const formatNumber = (num) => {
     if (num >= 1000000) {
@@ -162,11 +198,11 @@ const RecommendedVideos = ({ currentVideoId }) => {
     }
   ];
 
-  const quickVideos = [
-    { id: 1, title: 'Sri Venkatesw...', views: '3.6M views' },
-    { id: 2, title: 'Vishnu Sahasrana...', views: '787K views' },
-    { id: 3, title: 'Venkateswar a ...', views: '255K views' }
-  ];
+  // Format quick video title for display
+  const formatQuickTitle = (title) => {
+    if (!title) return '';
+    return title.length > 20 ? title.substring(0, 20) + '...' : title;
+  };
 
   const handleVideoClick = (videoId) => {
     navigate(`/?v=${videoId}`);
@@ -286,7 +322,18 @@ const RecommendedVideos = ({ currentVideoId }) => {
               onMouseLeave={() => setHoveredVideo(null)}
             >
               <div className="quick-video-thumbnail">
-                <div className={`thumbnail-placeholder quick-video ${hoveredVideo === `quick-${video.id}` ? 'hovered' : ''}`}>
+                {video.thumbnail && video.thumbnail.trim() !== '' ? (
+                  <img 
+                    src={video.thumbnail} 
+                    alt={video.title}
+                    className="quick-thumbnail-image"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div className={`thumbnail-placeholder quick-video ${hoveredVideo === `quick-${video.id}` ? 'hovered' : ''}`} style={{ display: (video.thumbnail && video.thumbnail.trim() !== '') ? 'none' : 'flex' }}>
                   {hoveredVideo === `quick-${video.id}` && (
                     <div className="play-overlay">
                       <Play size={24} fill="currentColor" />
@@ -297,8 +344,8 @@ const RecommendedVideos = ({ currentVideoId }) => {
                   )}
                 </div>
               </div>
-              <div className="quick-video-title">{video.title}</div>
-              <div className="quick-video-views">{video.views}</div>
+              <div className="quick-video-title">{formatQuickTitle(video.title)}</div>
+              <div className="quick-video-views">{typeof video.views === 'number' ? formatNumber(video.views) + ' views' : video.views}</div>
             </div>
           ))}
         </div>
