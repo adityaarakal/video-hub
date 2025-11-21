@@ -7,6 +7,7 @@ import VideoPlayer from '../components/VideoPlayer';
 import VideoDetails from '../components/VideoDetails';
 import CommentsSection from '../components/CommentsSection';
 import RecommendedVideos from '../components/RecommendedVideos';
+import RelatedVideos from '../components/RelatedVideos';
 
 const Home = () => {
   const [searchParams] = useSearchParams();
@@ -122,6 +123,7 @@ const Home = () => {
         <VideoPlayer video={video} />
         <VideoDetails video={video} />
         <CommentsSection videoId={video.id} />
+        <RelatedVideos videoId={video.id} channelId={video.channelId} />
       </div>
       <div className="secondary-column">
         <RecommendedVideos currentVideoId={video.id} />
