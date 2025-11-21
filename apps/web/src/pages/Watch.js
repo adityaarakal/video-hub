@@ -19,16 +19,14 @@ const Watch = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Extract videoId outside useEffect to avoid calling get() in dependencies
+  const videoId = searchParams.get('v');
+
   useEffect(() => {
     let isMounted = true;
     
     const loadVideo = async () => {
       if (!isMounted) return;
-      
-      setLoading(true);
-      setError(null);
-      
-      const videoId = searchParams.get('v');
       
       if (!videoId) {
         setError('No video specified');
@@ -36,6 +34,9 @@ const Watch = () => {
         navigate('/');
         return;
       }
+      
+      setLoading(true);
+      setError(null);
       
       try {
         const videoData = await api.getVideo(videoId);
@@ -100,8 +101,7 @@ const Watch = () => {
     return () => {
       isMounted = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams.get('v'), user?.id]);
+  }, [videoId, user?.id, navigate, setCurrentVideo, addToHistory, showError]);
 
   if (loading) {
     return (
