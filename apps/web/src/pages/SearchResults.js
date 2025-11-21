@@ -88,7 +88,18 @@ const SearchResults = () => {
                 onClick={() => handleVideoClick(video)}
               >
                 <div className="search-result-thumbnail">
-                  <div className="thumbnail-placeholder">
+                  {video.thumbnail && video.thumbnail.trim() !== '' ? (
+                    <img 
+                      src={video.thumbnail} 
+                      alt={video.title}
+                      className="thumbnail-image"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                      }}
+                    />
+                  ) : null}
+                  <div className="thumbnail-placeholder" style={{ display: (video.thumbnail && video.thumbnail.trim() !== '') ? 'none' : 'flex' }}>
                     <Play size={48} fill="currentColor" />
                   </div>
                   <span className="video-duration">

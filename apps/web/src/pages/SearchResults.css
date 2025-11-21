@@ -82,6 +82,15 @@
   overflow: hidden;
 }
 
+.search-result-thumbnail .thumbnail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
 .search-result-thumbnail .thumbnail-placeholder {
   width: 100%;
   height: 100%;
@@ -89,6 +98,9 @@
   align-items: center;
   justify-content: center;
   color: rgba(255, 255, 255, 0.6);
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .search-result-info {

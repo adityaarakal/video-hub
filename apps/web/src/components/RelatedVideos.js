@@ -96,13 +96,20 @@ const RelatedVideos = ({ videoId, channelId }) => {
             onClick={() => navigate(`/?v=${video.id}`)}
           >
             <div className="related-video-thumbnail">
-              {video.thumbnail ? (
-                <img src={video.thumbnail} alt={video.title} />
-              ) : (
-                <div className="thumbnail-placeholder">
-                  <Play size={24} />
-                </div>
-              )}
+              {video.thumbnail && video.thumbnail.trim() !== '' ? (
+                <img 
+                  src={video.thumbnail} 
+                  alt={video.title}
+                  className="thumbnail-image"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <div className="thumbnail-placeholder" style={{ display: (video.thumbnail && video.thumbnail.trim() !== '') ? 'none' : 'flex' }}>
+                <Play size={24} />
+              </div>
               <div className="related-video-duration">
                 {video.duration ? formatTime(video.duration) : '0:00'}
               </div>

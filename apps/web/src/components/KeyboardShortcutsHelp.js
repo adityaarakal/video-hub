@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { X, Play, Pause, Volume2, Maximize, ArrowLeft, ArrowRight, ArrowUp, ArrowDown, Search, Escape } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { X, Play, Volume2, Maximize, ArrowLeft, Search } from 'lucide-react';
 import './KeyboardShortcutsHelp.css';
 
 const KeyboardShortcutsHelp = ({ isOpen, onClose }) => {
@@ -24,7 +24,7 @@ const KeyboardShortcutsHelp = ({ isOpen, onClose }) => {
     { keys: ['M'], description: 'Mute/Unmute', icon: <Volume2 size={20} /> },
     { keys: ['F'], description: 'Toggle fullscreen', icon: <Maximize size={20} /> },
     { keys: ['/'], description: 'Focus search bar', icon: <Search size={20} /> },
-    { keys: ['Esc'], description: 'Close modals/menus', icon: <Escape size={20} /> },
+    { keys: ['Esc'], description: 'Close modals/menus', icon: <X size={20} /> },
   ];
 
   return (

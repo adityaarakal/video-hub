@@ -185,7 +185,18 @@ const Channel = () => {
                   onClick={() => handleVideoClick(video.id)}
                 >
                   <div className="channel-video-thumbnail">
-                    <div className="thumbnail-placeholder">
+                    {video.thumbnail && video.thumbnail.trim() !== '' ? (
+                      <img 
+                        src={video.thumbnail} 
+                        alt={video.title}
+                        className="thumbnail-image"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <div className="thumbnail-placeholder" style={{ display: (video.thumbnail && video.thumbnail.trim() !== '') ? 'none' : 'flex' }}>
                       <Play size={32} fill="currentColor" />
                     </div>
                     <span className="video-duration">

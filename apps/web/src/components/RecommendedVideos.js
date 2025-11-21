@@ -228,7 +228,7 @@ const RecommendedVideos = ({ currentVideoId }) => {
           }}
         >
           <div className="video-thumbnail">
-            {video.thumbnail ? (
+            {video.thumbnail && video.thumbnail.trim() !== '' ? (
               <img 
                 src={video.thumbnail} 
                 alt={video.title}
@@ -241,7 +241,7 @@ const RecommendedVideos = ({ currentVideoId }) => {
             ) : null}
             <div 
               className={`thumbnail-placeholder ${hoveredVideo === video.id ? 'hovered' : ''}`}
-              style={{ display: video.thumbnail ? 'none' : 'flex' }}
+              style={{ display: (video.thumbnail && video.thumbnail.trim() !== '') ? 'none' : 'flex' }}
             >
               {hoveredVideo === video.id && (
                 <div className="play-overlay">

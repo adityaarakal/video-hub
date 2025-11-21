@@ -40,14 +40,19 @@
   overflow: hidden;
 }
 
-.related-video-thumbnail img {
+.related-video-thumbnail img,
+.related-video-thumbnail .thumbnail-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
-.related-video-card:hover .related-video-thumbnail img {
+.related-video-card:hover .related-video-thumbnail img,
+.related-video-card:hover .related-video-thumbnail .thumbnail-image {
   transform: scale(1.1);
 }
 
@@ -58,6 +63,9 @@
   align-items: center;
   justify-content: center;
   color: rgba(255, 255, 255, 0.6);
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .related-video-duration {
