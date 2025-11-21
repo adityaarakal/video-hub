@@ -127,8 +127,6 @@ const Header = () => {
   const handleSuggestionClick = (suggestion) => {
     if (suggestion.type === 'video') {
       navigate(`/watch?v=${suggestion.id}`);
-    } else if (suggestion.type === 'channel') {
-      navigate(`/channel/${suggestion.id}`);
     }
     setShowSearchSuggestions(false);
     setSearchQuery('');
