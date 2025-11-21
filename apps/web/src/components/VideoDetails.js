@@ -339,22 +339,10 @@ const VideoDetails = ({ video }) => {
         </div>
         <div className="channel-details">
           <div className="channel-name-row">
-            <a 
-              href={`/channel/${channelId}`} 
-              className="channel-name" 
-              onClick={(e) => { e.preventDefault(); navigate(`/channel/${channelId}`); }}
-            >
-              Saregama Telugu
-            </a>
-            <CheckCircle2 size={16} className="verified-icon" />
-            <span className="subscriber-count">9.38M subscribers</span>
+            <span className="channel-name">
+              {channelName}
+            </span>
           </div>
-          <button 
-            className={`subscribe-button ${isSubscribed ? 'subscribed' : ''}`}
-            onClick={handleSubscribe}
-          >
-            {isSubscribed ? 'Subscribed' : 'Subscribe'}
-          </button>
         </div>
       </div>
       
