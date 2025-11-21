@@ -1,0 +1,37 @@
+{
+  "short_name": "VideoHub",
+  "name": "VideoHub - Video Streaming Platform",
+  "description": "Watch and discover amazing video content",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#7c3aed",
+  "background_color": "#0f172a",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "categories": ["entertainment", "video"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Search Videos",
+      "short_name": "Search",
+      "description": "Search for videos",
+      "url": "/search",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
+

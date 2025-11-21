@@ -11,6 +11,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Admin from './pages/Admin';
 import KeyboardShortcuts from './components/KeyboardShortcuts';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
 import './App.css';
 
 const PrivateRoute = ({ children }) => {
@@ -40,6 +41,7 @@ function App() {
                 <Route path="/search" element={<SearchResults />} />
                 <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
               </Routes>
+              <PWAInstallPrompt />
             </div>
           </Router>
         </AppProvider>

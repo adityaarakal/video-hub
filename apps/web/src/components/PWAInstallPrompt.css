@@ -1,0 +1,122 @@
+.pwa-install-prompt {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateX(-50%) translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+.pwa-install-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(30, 41, 59, 0.95);
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  max-width: 500px;
+}
+
+.pwa-install-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+  border-radius: 12px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.pwa-install-text {
+  flex: 1;
+}
+
+.pwa-install-text h3 {
+  font-size: 1rem;
+  margin: 0 0 0.25rem 0;
+  color: #e0e7ff;
+}
+
+.pwa-install-text p {
+  font-size: 0.875rem;
+  margin: 0;
+  color: #94a3b8;
+}
+
+.pwa-install-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pwa-install-button {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pwa-install-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+}
+
+.pwa-dismiss-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  border-radius: 6px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pwa-dismiss-button:hover {
+  background: rgba(124, 58, 237, 0.1);
+  border-color: rgba(124, 58, 237, 0.5);
+  color: #c7d2fe;
+}
+
+@media (max-width: 768px) {
+  .pwa-install-prompt {
+    left: 1rem;
+    right: 1rem;
+    transform: none;
+  }
+
+  .pwa-install-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .pwa-install-actions {
+    width: 100%;
+    justify-content: center;
+  }
+}
+

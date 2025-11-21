@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Icon Generator</title>
+</head>
+<body>
+  <canvas id="canvas192" width="192" height="192"></canvas>
+  <canvas id="canvas512" width="512" height="512"></canvas>
+  <script>
+    function createIcon(size, canvasId) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+      
+      // Background gradient
+      const gradient = ctx.createLinearGradient(0, 0, size, size);
+      gradient.addColorStop(0, '#7c3aed');
+      gradient.addColorStop(1, '#6366f1');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, size, size);
+      
+      // Play icon
+      ctx.fillStyle = 'white';
+      ctx.beginPath();
+      const centerX = size / 2;
+      const centerY = size / 2;
+      const iconSize = size * 0.4;
+      ctx.moveTo(centerX - iconSize * 0.2, centerY - iconSize * 0.3);
+      ctx.lineTo(centerX - iconSize * 0.2, centerY + iconSize * 0.3);
+      ctx.lineTo(centerX + iconSize * 0.3, centerY);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Download as PNG
+      canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `icon-${size}.png`;
+        a.click();
+      });
+    }
+    
+    setTimeout(() => {
+      createIcon(192, 'canvas192');
+      setTimeout(() => createIcon(512, 'canvas512'), 500);
+    }, 500);
+  </script>
+</body>
+</html>
