@@ -29,6 +29,7 @@ router.post('/register', validateRegister, asyncHandler(async (req, res) => {
     email: email.toLowerCase().trim(),
     password: hashedPassword,
     avatar: username.charAt(0).toUpperCase(),
+    role: 'user', // Default role
     createdAt: new Date().toISOString()
   });
 

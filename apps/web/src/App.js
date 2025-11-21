@@ -9,12 +9,18 @@ import SearchResults from './pages/SearchResults';
 import Channel from './pages/Channel';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Admin from './pages/Admin';
 import KeyboardShortcuts from './components/KeyboardShortcuts';
 import './App.css';
 
 const PrivateRoute = ({ children }) => {
   const { user } = useApp();
   return user ? children : <Navigate to="/login" />;
+};
+
+const AdminRoute = ({ children }) => {
+  const { user } = useApp();
+  return user && user.role === 'admin' ? children : <Navigate to="/" />;
 };
 
 function App() {
@@ -32,6 +38,7 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/search" element={<SearchResults />} />
                 <Route path="/channel/:channelId" element={<Channel />} />
+                <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
               </Routes>
             </div>
           </Router>

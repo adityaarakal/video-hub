@@ -396,6 +396,51 @@ class ApiService {
       xhr.send(formData);
     });
   }
+
+  // Admin APIs
+  async getAdminStats() {
+    return this.request('/admin/stats');
+  }
+
+  async getAdminVideos(params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    return this.request(`/admin/videos${queryString ? `?${queryString}` : ''}`);
+  }
+
+  async deleteAdminVideo(id) {
+    return this.request(`/admin/videos/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async getAdminUsers(params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    return this.request(`/admin/users${queryString ? `?${queryString}` : ''}`);
+  }
+
+  async updateUserRole(userId, role) {
+    return this.request(`/admin/users/${userId}/role`, {
+      method: 'PUT',
+      body: JSON.stringify({ role }),
+    });
+  }
+
+  async deleteAdminUser(userId) {
+    return this.request(`/admin/users/${userId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async getAdminComments(params = {}) {
+    const queryString = new URLSearchParams(params).toString();
+    return this.request(`/admin/comments${queryString ? `?${queryString}` : ''}`);
+  }
+
+  async deleteAdminComment(commentId) {
+    return this.request(`/admin/comments/${commentId}`, {
+      method: 'DELETE',
+    });
+  }
 }
 
 export default new ApiService();

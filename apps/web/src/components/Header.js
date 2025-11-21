@@ -6,7 +6,7 @@ import MobileMenu from './MobileMenu';
 import KeyboardShortcutsHelp from './KeyboardShortcutsHelp';
 import api from '../services/api';
 import './Header.css';
-import { Menu, X, Search, Mic, Plus, Bell, User, Play, ChevronDown, LogOut, Clock, Keyboard } from 'lucide-react';
+import { Menu, X, Search, Mic, Plus, Bell, User, Play, ChevronDown, LogOut, Clock, Keyboard, Shield } from 'lucide-react';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -298,6 +298,18 @@ const Header = () => {
                 <button className="dropdown-item">Your Channel</button>
                 <button className="dropdown-item">Studio</button>
                 <button className="dropdown-item">Settings</button>
+                {user && user.role === 'admin' && (
+                  <>
+                    <div className="dropdown-divider"></div>
+                    <button 
+                      className="dropdown-item" 
+                      onClick={() => { navigate('/admin'); setShowProfileMenu(false); }}
+                    >
+                      <Shield size={18} />
+                      <span>Admin Panel</span>
+                    </button>
+                  </>
+                )}
                 <div className="dropdown-divider"></div>
                 {user ? (
                   <button className="dropdown-item" onClick={handleLogout}>
