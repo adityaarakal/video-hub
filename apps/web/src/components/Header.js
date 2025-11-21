@@ -1,18 +1,37 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useApp } from '../context/AppContext';
+import { useToast } from '../context/ToastContext';
+import MobileMenu from './MobileMenu';
 import './Header.css';
-import { Menu, X, Search, Mic, Plus, Bell, User, Play, ChevronDown } from 'lucide-react';
+import { Menu, X, Search, Mic, Plus, Bell, User, Play, ChevronDown, LogOut } from 'lucide-react';
 
 const Header = () => {
-  const [searchQuery, setSearchQuery] = useState('venkateshwara suprabhatha');
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user, logout } = useApp();
+  const { info } = useToast();
+  const [searchQuery, setSearchQuery] = useState(() => {
+    if (location.pathname === '/search') {
+      const params = new URLSearchParams(location.search);
+      return params.get('q') || '';
+    }
+    return '';
+  });
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showCreateMenu, setShowCreateMenu] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      console.log('Searching for:', searchQuery);
-      // In a real app, this would navigate to search results
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 
@@ -21,17 +40,19 @@ const Header = () => {
   };
 
   const handleVoiceSearch = () => {
-    alert('Voice search feature - Click allow to enable microphone');
+    info('Voice search feature - Click allow to enable microphone', 4000);
   };
 
   return (
-    <header className="header">
-      <div className="header-container">
-        <div className="header-start">
-          <button className="icon-button" aria-label="Menu" onClick={() => alert('Menu clicked')}>
-            <Menu size={24} />
-          </button>
-          <a href="/" className="logo" onClick={(e) => { e.preventDefault(); window.location.reload(); }}>
+    <>
+      <MobileMenu isOpen={showMobileMenu} onClose={() => setShowMobileMenu(false)} />
+      <header className="header">
+        <div className="header-container">
+          <div className="header-start">
+            <button className="icon-button" aria-label="Menu" onClick={() => setShowMobileMenu(true)}>
+              <Menu size={24} />
+            </button>
+          <a href="/" className="logo" onClick={(e) => { e.preventDefault(); navigate('/'); }}>
             <div className="logo-icon">
               <Play size={24} fill="currentColor" />
             </div>
@@ -129,11 +150,17 @@ const Header = () => {
               <div className="dropdown-menu profile-dropdown">
                 <div className="profile-menu-header">
                   <div className="profile-menu-avatar">
-                    <User size={32} />
+                    {user?.avatar ? (
+                      <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, #7c3aed 0%, #6366f1 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 14 }}>
+                        {user.avatar}
+                      </div>
+                    ) : (
+                      <User size={32} />
+                    )}
                   </div>
                   <div className="profile-menu-info">
-                    <div className="profile-menu-name">Your Account</div>
-                    <div className="profile-menu-email">user@example.com</div>
+                    <div className="profile-menu-name">{user?.username || 'Guest'}</div>
+                    <div className="profile-menu-email">{user?.email || 'Not signed in'}</div>
                   </div>
                 </div>
                 <div className="dropdown-divider"></div>
@@ -141,13 +168,28 @@ const Header = () => {
                 <button className="dropdown-item">Studio</button>
                 <button className="dropdown-item">Settings</button>
                 <div className="dropdown-divider"></div>
-                <button className="dropdown-item">Sign out</button>
+                {user ? (
+                  <button className="dropdown-item" onClick={handleLogout}>
+                    <LogOut size={18} />
+                    <span>Sign out</span>
+                  </button>
+                ) : (
+                  <>
+                    <button className="dropdown-item" onClick={() => { navigate('/login'); setShowProfileMenu(false); }}>
+                      Sign in
+                    </button>
+                    <button className="dropdown-item" onClick={() => { navigate('/register'); setShowProfileMenu(false); }}>
+                      Sign up
+                    </button>
+                  </>
+                )}
               </div>
             )}
           </div>
         </div>
       </div>
-    </header>
+      </header>
+    </>
   );
 };
 

@@ -78,6 +78,21 @@ The main React web application featuring:
 - **Video Details**: Title, channel information, view count, likes, and action buttons
 - **Comments Section**: Comment list with user avatars, likes, replies, and sorting
 - **Recommended Videos**: Sidebar with related videos and Quick Videos section
+- **Full Routing**: React Router with Home, Search, and Channel pages
+- **State Management**: Context API with localStorage persistence
+- **API Integration**: RESTful API service for backend communication
+
+### `@videohub/server`
+
+Backend RESTful API server featuring:
+- **Video CRUD**: Create, read, update, delete videos
+- **Comment System**: Full comment CRUD with likes/dislikes and replies
+- **Channel Management**: Channel CRUD with subscription system
+- **Playlist Management**: Create and manage playlists
+- **User Management**: User accounts with watch history
+- **Search**: Full-text search across videos, channels, and playlists
+- **Authentication**: JWT-based user authentication
+- **JSON Database**: File-based storage (easily migratable to real database)
 
 ### `@videohub/shared`
 
@@ -88,7 +103,10 @@ Shared utilities and constants used across the monorepo:
 ## Available Scripts
 
 - `npm run dev` - Start development server for web app
-- `npm start` - Alias for dev
+- `npm run dev:server` - Start backend server in development mode
+- `npm run dev:all` - Start both frontend and backend servers
+- `npm start` - Alias for dev (web app)
+- `npm run server` - Start backend server
 - `npm run build` - Build web app
 - `npm run build:all` - Build all workspaces
 - `npm test` - Run tests

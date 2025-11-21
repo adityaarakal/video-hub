@@ -1,79 +1,207 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useApp } from '../context/AppContext';
+import { useToast } from '../context/ToastContext';
+import api from '../services/api';
 import './VideoDetails.css';
-import { ThumbsUp, ThumbsDown, Share2, Download, Scissors, MoreVertical, CheckCircle2, Copy, Link2, Facebook, Twitter } from 'lucide-react';
+import { ThumbsUp, ThumbsDown, Share2, Download, Scissors, MoreVertical, CheckCircle2, Copy, Facebook, Twitter, Clock, List } from 'lucide-react';
 
-const VideoDetails = () => {
-  const [likes, setLikes] = useState(177000);
+const VideoDetails = ({ video }) => {
+  const navigate = useNavigate();
+  const { user, playlists, subscriptions, addToPlaylist, subscribe, unsubscribe, createPlaylist } = useApp();
+  const { info: showInfo, success: showSuccess, warning: showWarning, error: showError } = useToast();
+  const [newPlaylistName, setNewPlaylistName] = useState('');
+  const [showCreatePlaylistInput, setShowCreatePlaylistInput] = useState(false);
+  const [likes, setLikes] = useState(video?.likes || 0);
   const [isLiked, setIsLiked] = useState(false);
   const [isDisliked, setIsDisliked] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [showDescription, setShowDescription] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [showPlaylistMenu, setShowPlaylistMenu] = useState(false);
   const [copied, setCopied] = useState(false);
+  
+  const channelId = video?.channelId || 'saregama-telugu';
+  const channelName = video?.channelName || 'Saregama Telugu';
+  
+  useEffect(() => {
+    if (video) {
+      setLikes(video.likes || 0);
+    }
+  }, [video]);
 
-  const fullDescription = `Watch Sri Venkateswara Suprabhatham with lyrics sung by the legendary MS Subbulakshmi.
+  useEffect(() => {
+    const checkSubscription = async () => {
+      if (user && channelId) {
+        try {
+          const result = await api.checkSubscription(channelId, user.id);
+          setIsSubscribed(result.subscribed || false);
+        } catch (error) {
+          console.error('Failed to check subscription:', error);
+        }
+      }
+    };
+    checkSubscription();
+  }, [user, channelId]);
+  
+  const currentVideo = {
+    id: video?.id,
+    title: video?.title,
+    channel: channelName,
+    channelId: channelId,
+    thumbnail: video?.thumbnail
+  };
 
-Label: Saregama India Limited, A RPSG Group Company
+  const fullDescription = video?.description || 'No description available.';
+  const shortDescription = video?.description?.substring(0, 200) || 'No description available.';
 
-To buy the original and virus free track, visit www.saregama.com
-
-Follow us on social media for more updates
-Facebook: http://www.facebook.com/Saregamatelugu
-Twitter: https://twitter.com/saregamasouth
-
-#mssubbulakshmi #SriVenkateswaraSuprabhatham #saregamatelugu`;
-
-  const shortDescription = `Watch Sri Venkateswara Suprabhatham with lyrics sung by the legendary MS Subbulakshmi.
-
-Label: Saregama India Limited, A RPSG Group Company`;
-
-  const handleLike = () => {
-    if (isLiked) {
-      setLikes(likes - 1);
-      setIsLiked(false);
-    } else {
-      setLikes(likes + 1);
-      setIsLiked(true);
+  const handleLike = async () => {
+    if (!user) {
+      showWarning('Please login to like videos', 3000);
+      return;
+    }
+    
+    if (!video?.id) return;
+    
+    try {
+      const action = isLiked ? 'unlike' : 'like';
+      const updated = await api.likeVideo(video.id, action);
+      setLikes(updated.likes || 0);
+      setIsLiked(!isLiked);
       if (isDisliked) {
         setIsDisliked(false);
       }
+    } catch (error) {
+      console.error('Failed to like video:', error);
+      showError('Failed to like video', 3000);
     }
   };
 
-  const handleDislike = () => {
-    if (isDisliked) {
-      setIsDisliked(false);
-    } else {
-      setIsDisliked(true);
+  const handleDislike = async () => {
+    if (!user) {
+      showWarning('Please login to dislike videos', 3000);
+      return;
+    }
+    
+    if (!video?.id) return;
+    
+    try {
+      const action = isDisliked ? 'undislike' : 'dislike';
+      await api.dislikeVideo(video.id, action);
+      setIsDisliked(!isDisliked);
       if (isLiked) {
         setLikes(likes - 1);
         setIsLiked(false);
       }
+    } catch (error) {
+      console.error('Failed to dislike video:', error);
+      showError('Failed to dislike video', 3000);
     }
   };
 
-  const handleSubscribe = () => {
-    setIsSubscribed(!isSubscribed);
+  const handleSubscribe = async () => {
+    if (!user) {
+      showWarning('Please login to subscribe', 3000);
+      navigate('/login');
+      return;
+    }
+    
+    try {
+      if (isSubscribed) {
+        await unsubscribe(channelId);
+        setIsSubscribed(false);
+        showInfo(`Unsubscribed from ${channelName}`, 2000);
+      } else {
+        await subscribe(channelId, channelName);
+        setIsSubscribed(true);
+        showSuccess(`Subscribed to ${channelName}!`, 2000);
+      }
+    } catch (error) {
+      showError('Failed to update subscription', 3000);
+    }
+  };
+
+  const handleSaveToPlaylist = async (playlistId) => {
+    if (!user) {
+      showWarning('Please login to save videos to playlists', 3000);
+      navigate('/login');
+      return;
+    }
+    
+    try {
+      await addToPlaylist(playlistId, currentVideo);
+      const playlist = playlists.find(p => p.id === playlistId);
+      showSuccess(`Added to ${playlist?.name || 'playlist'}!`, 2000);
+      setShowPlaylistMenu(false);
+      setShowMoreMenu(false);
+    } catch (error) {
+      showError('Failed to add to playlist', 3000);
+    }
+  };
+
+  const handleWatchLater = async () => {
+    if (!user) {
+      showWarning('Please login to save videos', 3000);
+      navigate('/login');
+      return;
+    }
+    
+    try {
+      await addToPlaylist('watch-later', currentVideo);
+      showSuccess('Added to Watch Later!', 2000);
+      setShowMoreMenu(false);
+    } catch (error) {
+      showError('Failed to add to Watch Later', 3000);
+    }
+  };
+
+  const handleCreatePlaylist = async () => {
+    if (!user) {
+      showWarning('Please login to create playlists', 3000);
+      navigate('/login');
+      return;
+    }
+
+    if (!newPlaylistName.trim()) {
+      showError('Please enter a playlist name', 3000);
+      return;
+    }
+
+    try {
+      const newPlaylist = await createPlaylist(newPlaylistName.trim());
+      if (newPlaylist) {
+        showSuccess(`Playlist "${newPlaylistName}" created!`, 2000);
+        setNewPlaylistName('');
+        setShowCreatePlaylistInput(false);
+        // Optionally add current video to new playlist
+        await addToPlaylist(newPlaylist.id, currentVideo);
+      }
+    } catch (error) {
+      showError('Failed to create playlist', 3000);
+    }
   };
 
   const handleShare = (method) => {
     const url = window.location.href;
-    const title = 'MS Subbulakshmi Sri Venkateswara Suprabhatham | Lyrical Video';
+    const title = video?.title || 'VideoHub Video';
     
     switch(method) {
       case 'copy':
         navigator.clipboard.writeText(url);
         setCopied(true);
+        showSuccess('Link copied to clipboard!', 2000);
         setTimeout(() => setCopied(false), 2000);
         setShowShareMenu(false);
         break;
       case 'facebook':
         window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+        showInfo('Opening Facebook...', 2000);
         setShowShareMenu(false);
         break;
       case 'twitter':
         window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`, '_blank');
+        showInfo('Opening Twitter...', 2000);
         setShowShareMenu(false);
         break;
       default:
@@ -82,11 +210,11 @@ Label: Saregama India Limited, A RPSG Group Company`;
   };
 
   const handleDownload = () => {
-    alert('Download feature - In a real app, this would initiate video download');
+    showInfo('Download feature - In a real app, this would initiate video download', 4000);
   };
 
   const handleClip = () => {
-    alert('Clip feature - In a real app, this would open clip creation tool');
+    showInfo('Clip feature - In a real app, this would open clip creation tool', 4000);
   };
 
   const formatNumber = (num) => {
@@ -101,14 +229,16 @@ Label: Saregama India Limited, A RPSG Group Company`;
   return (
     <div className="video-details">
       <h1 className="video-title">
-        MS Subbulakshmi Sri Venkateswara Suprabhatham | Lyrical Video
+        {video?.title || 'Video Title'}
       </h1>
       
       <div className="video-metadata">
         <div className="video-stats">
-          <span className="view-count">48M views</span>
+          <span className="view-count">{formatNumber(video?.views || 0)} views</span>
           <span className="separator">•</span>
-          <span className="upload-date">12 years ago</span>
+          <span className="upload-date">
+            {video?.createdAt ? new Date(video.createdAt).toLocaleDateString() : 'Unknown date'}
+          </span>
         </div>
         
         <div className="video-actions">
@@ -167,11 +297,75 @@ Label: Saregama India Limited, A RPSG Group Company`;
             </button>
             {showMoreMenu && (
               <div className="more-dropdown" onBlur={() => setTimeout(() => setShowMoreMenu(false), 200)}>
-                <button className="dropdown-item">Save to Watch Later</button>
-                <button className="dropdown-item">Save to Playlist</button>
+                <button className="dropdown-item" onClick={handleWatchLater}>
+                  <Clock size={18} />
+                  <span>Save to Watch Later</span>
+                </button>
+                <button className="dropdown-item" onClick={() => { setShowPlaylistMenu(true); setShowMoreMenu(false); }}>
+                  <List size={18} />
+                  <span>Save to Playlist</span>
+                </button>
+                <div className="dropdown-divider"></div>
                 <button className="dropdown-item">Report</button>
               </div>
             )}
+            {showPlaylistMenu && (
+              <div className="playlist-dropdown" onBlur={() => setTimeout(() => setShowPlaylistMenu(false), 200)}>
+                <div className="dropdown-header">Save to Playlist</div>
+                {playlists.map(playlist => (
+                  <button 
+                    key={playlist.id}
+                    className="dropdown-item"
+                    onClick={() => handleSaveToPlaylist(playlist.id)}
+                  >
+                    <span>{playlist.name}</span>
+                    <span className="playlist-count">({playlist.videos.length})</span>
+                  </button>
+                ))}
+              <div className="dropdown-divider"></div>
+              {showCreatePlaylistInput ? (
+                <div className="create-playlist-input">
+                  <input
+                    type="text"
+                    placeholder="Playlist name"
+                    value={newPlaylistName}
+                    onChange={(e) => setNewPlaylistName(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && newPlaylistName.trim()) {
+                        handleCreatePlaylist();
+                      }
+                    }}
+                    autoFocus
+                  />
+                  <div className="create-playlist-actions">
+                    <button 
+                      className="dropdown-item"
+                      onClick={() => {
+                        setShowCreatePlaylistInput(false);
+                        setNewPlaylistName('');
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      className="dropdown-item"
+                      onClick={handleCreatePlaylist}
+                      disabled={!newPlaylistName.trim()}
+                    >
+                      Create
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button 
+                  className="dropdown-item"
+                  onClick={() => setShowCreatePlaylistInput(true)}
+                >
+                  Create new playlist
+                </button>
+              )}
+            </div>
+          )}
           </div>
         </div>
       </div>
@@ -182,7 +376,11 @@ Label: Saregama India Limited, A RPSG Group Company`;
         </div>
         <div className="channel-details">
           <div className="channel-name-row">
-            <a href="#" className="channel-name" onClick={(e) => { e.preventDefault(); alert('Channel page'); }}>
+            <a 
+              href={`/channel/${channelId}`} 
+              className="channel-name" 
+              onClick={(e) => { e.preventDefault(); navigate(`/channel/${channelId}`); }}
+            >
               Saregama Telugu
             </a>
             <CheckCircle2 size={16} className="verified-icon" />

@@ -135,6 +135,69 @@
   background-color: rgba(124, 58, 237, 0.2);
 }
 
+.playlist-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 280px;
+  max-height: 400px;
+  overflow-y: auto;
+  background: #1a1f3a;
+  border: 1px solid #2d3561;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+}
+
+.playlist-dropdown .dropdown-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.playlist-count {
+  font-size: 12px;
+  color: #a5b4fc;
+  opacity: 0.7;
+}
+
+.create-playlist-input {
+  padding: 8px;
+}
+
+.create-playlist-input input {
+  width: 100%;
+  padding: 8px 12px;
+  background: rgba(26, 31, 58, 0.6);
+  border: 1px solid rgba(45, 53, 97, 0.5);
+  border-radius: 6px;
+  color: #e0e7ff;
+  font-size: 14px;
+  outline: none;
+  margin-bottom: 8px;
+}
+
+.create-playlist-input input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
+}
+
+.create-playlist-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.create-playlist-actions .dropdown-item {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.create-playlist-actions .dropdown-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .like-button,
 .dislike-button {
   padding: 0 12px;

@@ -1,11 +1,99 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
 import './RecommendedVideos.css';
 import { Play } from 'lucide-react';
 
-const RecommendedVideos = () => {
+const RecommendedVideos = ({ currentVideoId }) => {
+  const navigate = useNavigate();
   const [hoveredVideo, setHoveredVideo] = useState(null);
+  const [videos, setVideos] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const videos = [
+  useEffect(() => {
+    let isMounted = true;
+    
+    const loadRecommended = async () => {
+      if (!isMounted) return;
+      
+      setLoading(true);
+      try {
+        const videoId = currentVideoId || '1';
+        const data = await api.getRecommendedVideos(videoId, 10);
+        
+        if (!isMounted) return;
+        
+        const videoList = Array.isArray(data?.videos) ? data.videos : (Array.isArray(data) ? data : []);
+        
+        if (videoList.length > 0) {
+          setVideos(videoList);
+        } else {
+          // If no recommended videos, get all videos except current
+          const allVideosResponse = await api.getVideos({ limit: 20 });
+          if (!isMounted) return;
+          const allVideos = allVideosResponse?.videos || [];
+          const filteredVideos = allVideos.filter(v => String(v.id) !== String(videoId));
+          setVideos(filteredVideos.slice(0, 10));
+        }
+      } catch (error) {
+        if (!isMounted) return;
+        
+        console.error('Failed to load recommended videos:', error);
+        // Fallback to all videos if recommended fails
+        try {
+          const allVideos = await api.getVideos({ limit: 10 });
+          if (!isMounted) return;
+          console.log('Fallback: Loaded all videos:', allVideos?.videos?.length || 0);
+          setVideos(allVideos?.videos || []);
+        } catch (err) {
+          console.error('Failed to load videos:', err);
+          // Use hardcoded videos as last resort
+          setVideos([]);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadRecommended();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [currentVideoId]);
+
+  const formatNumber = (num) => {
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + 'M';
+    } else if (num >= 1000) {
+      return (num / 1000).toFixed(0) + 'K';
+    }
+    return num.toString();
+  };
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const getTimeAgo = (dateString) => {
+    if (!dateString) return 'Unknown';
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+    
+    if (diffInSeconds < 60) return 'just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+    if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)} months ago`;
+    return `${Math.floor(diffInSeconds / 31536000)} years ago`;
+  };
+
+  const hardcodedVideos = [
     {
       id: 1,
       thumbnail: '',
@@ -79,25 +167,46 @@ const RecommendedVideos = () => {
   ];
 
   const handleVideoClick = (videoId) => {
-    console.log('Video clicked:', videoId);
-    // In a real app, this would navigate to the video page
-    alert(`Loading video ${videoId}...`);
+    navigate(`/?v=${videoId}`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleChannelClick = (e, channelName) => {
+  const handleChannelClick = (e, channelId, channelName) => {
     e.stopPropagation();
-    console.log('Channel clicked:', channelName);
-    alert(`Opening channel: ${channelName}`);
+    navigate(`/channel/${channelId}`);
   };
 
   const handleQuickVideoClick = (videoId) => {
-    console.log('Quick video clicked:', videoId);
-    alert(`Loading quick video ${videoId}...`);
+    navigate(`/?v=${videoId}`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  if (loading) {
+    return (
+      <div className="recommended-videos">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Always show videos from API if available, otherwise fallback to hardcoded
+  const displayVideos = videos.length > 0 ? videos : hardcodedVideos;
+  
+  // Debug logging
+  if (displayVideos.length === 0) {
+    console.warn('No videos to display! Videos state:', videos, 'Hardcoded:', hardcodedVideos.length);
+  }
 
   return (
     <div className="recommended-videos">
-      {videos.map(video => (
+      {displayVideos.length === 0 && !loading && (
+        <div style={{ padding: '20px', color: '#a5b4fc', textAlign: 'center' }}>
+          No videos available. Please check your connection.
+        </div>
+      )}
+      {displayVideos.map(video => (
         <div 
           key={video.id} 
           className="video-card"
@@ -116,21 +225,23 @@ const RecommendedVideos = () => {
                 <Play size={32} fill="currentColor" />
               )}
             </div>
-            <div className="video-duration">{video.duration}</div>
+            <div className="video-duration">
+              {video.duration ? (typeof video.duration === 'number' ? formatTime(video.duration) : video.duration) : '0:00'}
+            </div>
             {video.isNew && <span className="new-badge">New</span>}
           </div>
           <div className="video-info">
             <h3 className="video-title">{video.title}</h3>
             <div 
               className="video-channel"
-              onClick={(e) => handleChannelClick(e, video.channel)}
+              onClick={(e) => handleChannelClick(e, video.channelId || `channel-${video.id}`, video.channelName || video.channel)}
             >
-              {video.channel}
+              {video.channelName || video.channel}
             </div>
             <div className="video-meta">
-              <span>{video.views}</span>
+              <span>{typeof video.views === 'number' ? formatNumber(video.views) + ' views' : video.views}</span>
               <span className="separator">•</span>
-              <span>{video.timeAgo}</span>
+              <span>{video.createdAt ? getTimeAgo(video.createdAt) : video.timeAgo || 'Unknown'}</span>
             </div>
           </div>
         </div>

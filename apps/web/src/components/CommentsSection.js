@@ -1,145 +1,172 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useApp } from '../context/AppContext';
+import { useToast } from '../context/ToastContext';
+import api from '../services/api';
 import './CommentsSection.css';
 import { ArrowUpDown, ThumbsUp, ThumbsDown, ChevronDown, ChevronUp } from 'lucide-react';
 
-const CommentsSection = () => {
-  const [comments, setComments] = useState([
-    {
-      id: 1,
-      author: '@Riyas009',
-      avatar: 'R',
-      timeAgo: '4 months ago',
-      text: 'I am a Muslim from Kerala. Since my childhood, I have been listening to this spiritual mantra from a nearby Sri Narasimha temple. This brings back so many memories.',
-      likes: 282,
-      replies: 9,
-      isLiked: false,
-      isDisliked: false,
-      showReplies: false
-    },
-    {
-      id: 2,
-      author: '@bharathjain1482',
-      avatar: 'B',
-      timeAgo: '2 years ago',
-      text: 'South Indian people are very important to save culture, tradition and religion.',
-      likes: 776,
-      replies: 23,
-      isLiked: false,
-      isDisliked: false,
-      showReplies: false
-    },
-    {
-      id: 3,
-      author: '@julesm7418',
-      avatar: 'J',
-      timeAgo: '4 years ago',
-      text: 'I am a Catholic. My neighbor used to play this song every morning and it became a habit for me to listen to it. She is battling cancer now and I hope she fights like a warrior queen.',
-      likes: 1400,
-      replies: 37,
-      isLiked: false,
-      isDisliked: false,
-      showReplies: false
-    },
-    {
-      id: 4,
-      author: '@mohamedfaizal2013',
-      avatar: 'M',
-      timeAgo: '2 years ago (edited)',
-      text: 'I am a Muslim. When I was a child, I used to hear this song played in Hindu homes and temples. I miss those days.',
-      likes: 283,
-      replies: 11,
-      isLiked: false,
-      isDisliked: false,
-      showReplies: false
-    },
-    {
-      id: 5,
-      author: '@musicbe11e',
-      avatar: 'M',
-      timeAgo: '2 months ago',
-      text: 'I had a dream where my mother told me to listen to this song daily. I hope my life improves.',
-      likes: 62,
-      replies: 7,
-      isLiked: false,
-      isDisliked: false,
-      showReplies: false
-    }
-  ]);
-
+const CommentsSection = ({ videoId }) => {
+  const { user } = useApp();
+  const { error: showError, success: showSuccess, warning: showWarning } = useToast();
+  const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [sortBy, setSortBy] = useState('Top comments');
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyText, setReplyText] = useState('');
   const [isCommentFocused, setIsCommentFocused] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [totalComments, setTotalComments] = useState(0);
 
-  const totalComments = 8272;
-
-  const handleLikeComment = (id) => {
-    setComments(comments.map(comment => {
-      if (comment.id === id) {
-        if (comment.isLiked) {
-          return { ...comment, isLiked: false, likes: comment.likes - 1 };
-        } else {
-          return { 
-            ...comment, 
-            isLiked: true, 
-            isDisliked: false,
-            likes: comment.likes + (comment.isDisliked ? 2 : 1)
-          };
-        }
+  useEffect(() => {
+    const loadComments = async () => {
+      if (!videoId) return;
+      
+      setLoading(true);
+      try {
+        const sortType = sortBy === 'Newest first' ? 'newest' : 'top';
+        const data = await api.getComments(videoId, sortType);
+        const formattedComments = (data.comments || []).map(comment => ({
+          ...comment,
+          isLiked: false,
+          isDisliked: false,
+          showReplies: false,
+          timeAgo: comment.createdAt ? getTimeAgo(comment.createdAt) : 'Unknown'
+        }));
+        setComments(formattedComments);
+        setTotalComments(data.total || formattedComments.length);
+      } catch (error) {
+        console.error('Failed to load comments:', error);
+        setComments([]);
+      } finally {
+        setLoading(false);
       }
-      return comment;
-    }));
+    };
+
+    loadComments();
+  }, [videoId, sortBy]);
+
+  const getTimeAgo = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+    
+    if (diffInSeconds < 60) return 'just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+    if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)} months ago`;
+    return `${Math.floor(diffInSeconds / 31536000)} years ago`;
   };
 
-  const handleDislikeComment = (id) => {
-    setComments(comments.map(comment => {
-      if (comment.id === id) {
-        if (comment.isDisliked) {
-          return { ...comment, isDisliked: false };
-        } else {
-          return { 
-            ...comment, 
-            isDisliked: true, 
-            isLiked: false,
-            likes: comment.likes - (comment.isLiked ? 2 : 1)
-          };
-        }
-      }
-      return comment;
-    }));
+  const handleLikeComment = async (id) => {
+    if (!user) {
+      showWarning('Please login to like comments', 3000);
+      return;
+    }
+    
+    try {
+      const comment = comments.find(c => c.id === id);
+      const action = comment?.isLiked ? 'unlike' : 'like';
+      const updated = await api.likeComment(id, action);
+      
+      setComments(comments.map(c => 
+        c.id === id ? { ...c, ...updated, isLiked: !c.isLiked, isDisliked: false } : c
+      ));
+    } catch (error) {
+      console.error('Failed to like comment:', error);
+      showError('Failed to like comment', 3000);
+    }
   };
 
-  const handleSubmitComment = (e) => {
+  const handleDislikeComment = async (id) => {
+    if (!user) {
+      showWarning('Please login to dislike comments', 3000);
+      return;
+    }
+    
+    try {
+      const comment = comments.find(c => c.id === id);
+      const action = comment?.isDisliked ? 'undislike' : 'dislike';
+      const updated = await api.dislikeComment(id, action);
+      
+      setComments(comments.map(c => 
+        c.id === id ? { ...c, ...updated, isDisliked: !c.isDisliked, isLiked: false } : c
+      ));
+    } catch (error) {
+      console.error('Failed to dislike comment:', error);
+      showError('Failed to dislike comment', 3000);
+    }
+  };
+
+  const handleSubmitComment = async (e) => {
     e.preventDefault();
-    if (newComment.trim()) {
-      const newCommentObj = {
-        id: comments.length + 1,
-        author: '@user' + Math.floor(Math.random() * 1000),
-        avatar: 'U',
-        timeAgo: 'just now',
-        text: newComment,
-        likes: 0,
-        replies: 0,
-        isLiked: false,
-        isDisliked: false,
-        showReplies: false
-      };
-      setComments([newCommentObj, ...comments]);
-      setNewComment('');
+    if (!user) {
+      showWarning('Please login to comment', 3000);
+      return;
+    }
+    
+    if (newComment.trim() && videoId) {
+      try {
+        const newCommentObj = await api.createComment({
+          videoId,
+          text: newComment,
+          author: user.username || `@user${user.id}`,
+          avatar: user.avatar || user.username?.charAt(0).toUpperCase() || 'U'
+        });
+        
+        setComments([{
+          ...newCommentObj,
+          isLiked: false,
+          isDisliked: false,
+          showReplies: false,
+          timeAgo: 'just now'
+        }, ...comments]);
+        setNewComment('');
+        setTotalComments(totalComments + 1);
+        showSuccess('Comment posted successfully!', 2000);
+      } catch (error) {
+        console.error('Failed to submit comment:', error);
+        showError('Failed to submit comment. Please try again.', 4000);
+      }
     }
   };
 
   const handleReply = (id) => {
+    if (!user) {
+      showWarning('Please login to reply', 3000);
+      return;
+    }
     setReplyingTo(id);
   };
 
-  const handleSubmitReply = (commentId) => {
+  const handleSubmitReply = async (commentId) => {
     if (replyText.trim()) {
-      alert(`Reply submitted: "${replyText}"`);
-      setReplyText('');
-      setReplyingTo(null);
+      try {
+        await api.replyToComment(commentId, {
+          text: replyText,
+          author: user.username || `@user${user.id}`,
+          avatar: user.avatar || user.username?.charAt(0).toUpperCase() || 'U'
+        });
+        
+        // Reload comments to get updated reply count
+        const data = await api.getComments(videoId, sortBy === 'Newest first' ? 'newest' : 'top');
+        const formattedComments = (data.comments || []).map(comment => ({
+          ...comment,
+          isLiked: false,
+          isDisliked: false,
+          showReplies: false,
+          timeAgo: comment.createdAt ? getTimeAgo(comment.createdAt) : 'Unknown'
+        }));
+        setComments(formattedComments);
+        
+        setReplyText('');
+        setReplyingTo(null);
+        showSuccess('Reply posted successfully!', 2000);
+      } catch (error) {
+        console.error('Failed to submit reply:', error);
+        showError('Failed to submit reply. Please try again.', 4000);
+      }
     }
   };
 
@@ -155,6 +182,17 @@ const CommentsSection = () => {
     }
     return num.toString();
   };
+
+  if (loading) {
+    return (
+      <div className="comments-section">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading comments...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="comments-section">
@@ -191,7 +229,7 @@ const CommentsSection = () => {
       
       <form className="add-comment" onSubmit={handleSubmitComment}>
         <div className="comment-avatar">
-          <div className="avatar-placeholder">A</div>
+          <div className="avatar-placeholder">{user?.avatar || user?.username?.charAt(0).toUpperCase() || 'A'}</div>
         </div>
         <div className="comment-input-wrapper">
           <input 
@@ -231,7 +269,7 @@ const CommentsSection = () => {
         {comments.map(comment => (
           <div key={comment.id} className="comment-item">
             <div className="comment-avatar">
-              <div className="avatar-placeholder">{comment.avatar}</div>
+              <div className="avatar-placeholder">{comment.avatar || comment.author?.charAt(0).toUpperCase() || 'U'}</div>
             </div>
             <div className="comment-content">
               <div className="comment-header">
