@@ -334,7 +334,7 @@ const VideoDetails = ({ video }) => {
       
       <div className="channel-info">
         <div className="channel-avatar">
-          <div className="avatar-placeholder">ST</div>
+          <div className="avatar-placeholder">{channelName.charAt(0).toUpperCase()}</div>
         </div>
         <div className="channel-details">
           <div className="channel-name-row">
