@@ -40,7 +40,17 @@ class ApiService {
       }
 
       if (!response.ok) {
-        throw new Error(data.error || `Request failed with status ${response.status}`);
+        // Handle validation errors with details
+        if (data.details && Array.isArray(data.details)) {
+          const validationMessages = data.details.map(d => d.message).join(', ');
+          const error = new Error(validationMessages || data.error || `Request failed with status ${response.status}`);
+          error.status = response.status;
+          error.details = data.details;
+          throw error;
+        }
+        const error = new Error(data.error || `Request failed with status ${response.status}`);
+        error.status = response.status;
+        throw error;
       }
 
       return data;
@@ -48,6 +58,15 @@ class ApiService {
       console.error('API Error:', error);
       // Re-throw with more context
       if (error.message) {
+        // Preserve status and details if they exist
+        if (error.status) {
+          const newError = new Error(error.message);
+          newError.status = error.status;
+          if (error.details) {
+            newError.details = error.details;
+          }
+          throw newError;
+        }
         throw error;
       }
       throw new Error(error.message || 'Network error. Please check if the server is running.');

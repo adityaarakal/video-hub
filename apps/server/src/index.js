@@ -3,6 +3,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
 const fs = require('fs');
+const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 
 // Import routes
 const videoRoutes = require('./routes/videos');
@@ -348,6 +349,12 @@ app.use('/api/upload', uploadRoutes);
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'VideoHub API is running' });
 });
+
+// 404 handler (must be after all routes)
+app.use(notFoundHandler);
+
+// Global error handler (must be last)
+app.use(errorHandler);
 
 // Initialize database
 initDatabase();

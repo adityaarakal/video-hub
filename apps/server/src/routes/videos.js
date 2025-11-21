@@ -1,45 +1,42 @@
 const express = require('express');
 const router = express.Router();
 const Database = require('../utils/database');
+const { validateVideo, validatePagination, asyncHandler } = require('../middleware/validation');
 
 const videoDb = new Database('videos');
 
 // GET /api/videos - Get all videos
-router.get('/', (req, res) => {
-  try {
-    const { channelId, limit = 20, offset = 0, page = 1 } = req.query;
-    let videos = videoDb.getAll();
+router.get('/', validatePagination, asyncHandler(async (req, res) => {
+  const { channelId, limit = 20, offset = 0, page = 1 } = req.query;
+  let videos = videoDb.getAll();
 
-    if (channelId) {
-      videos = videos.filter(v => v.channelId === channelId);
-    }
-
-    // Sort by createdAt (newest first)
-    videos.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-    // Calculate pagination
-    const pageNum = parseInt(page) || 1;
-    const limitNum = parseInt(limit) || 20;
-    const offsetNum = parseInt(offset) || (pageNum - 1) * limitNum;
-    const total = videos.length;
-    const totalPages = Math.ceil(total / limitNum);
-    
-    // Apply pagination
-    const paginated = videos.slice(offsetNum, offsetNum + limitNum);
-
-    res.json({
-      videos: paginated,
-      total,
-      limit: limitNum,
-      offset: offsetNum,
-      page: pageNum,
-      totalPages,
-      hasMore: offsetNum + limitNum < total
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  if (channelId) {
+    videos = videos.filter(v => v.channelId === channelId);
   }
-});
+
+  // Sort by createdAt (newest first)
+  videos.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  // Calculate pagination
+  const pageNum = parseInt(page) || 1;
+  const limitNum = parseInt(limit) || 20;
+  const offsetNum = parseInt(offset) || (pageNum - 1) * limitNum;
+  const total = videos.length;
+  const totalPages = Math.ceil(total / limitNum);
+  
+  // Apply pagination
+  const paginated = videos.slice(offsetNum, offsetNum + limitNum);
+
+  res.json({
+    videos: paginated,
+    total,
+    limit: limitNum,
+    offset: offsetNum,
+    page: pageNum,
+    totalPages,
+    hasMore: offsetNum + limitNum < total
+  });
+}));
 
 // GET /api/videos/recommended - Get recommended videos (MUST come before /:id route)
 router.get('/recommended', (req, res) => {
@@ -103,43 +100,35 @@ router.get('/:id', (req, res) => {
 });
 
 // POST /api/videos - Create new video
-router.post('/', (req, res) => {
-  try {
-    const {
-      title,
-      description,
-      channelId,
-      channelName,
-      duration,
-      thumbnail,
-      videoUrl,
-      tags = []
-    } = req.body;
+router.post('/', validateVideo, asyncHandler(async (req, res) => {
+  const {
+    title,
+    description,
+    channelId,
+    channelName,
+    duration,
+    thumbnail,
+    videoUrl,
+    tags = []
+  } = req.body;
 
-    if (!title || !channelId || !channelName) {
-      return res.status(400).json({ error: 'Title, channelId, and channelName are required' });
-    }
+  const video = videoDb.create({
+    title: title.trim(),
+    description: (description || '').trim(),
+    channelId: channelId.trim(),
+    channelName: channelName.trim(),
+    views: 0,
+    likes: 0,
+    dislikes: 0,
+    duration: duration || 0,
+    thumbnail: (thumbnail || '').trim(),
+    videoUrl: (videoUrl || '').trim(),
+    tags: Array.isArray(tags) ? tags : [],
+    createdAt: new Date().toISOString()
+  });
 
-    const video = videoDb.create({
-      title,
-      description: description || '',
-      channelId,
-      channelName,
-      views: 0,
-      likes: 0,
-      dislikes: 0,
-      duration: duration || 0,
-      thumbnail: thumbnail || '',
-      videoUrl: videoUrl || '',
-      tags: Array.isArray(tags) ? tags : [],
-      createdAt: new Date().toISOString()
-    });
-
-    res.status(201).json(video);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+  res.status(201).json(video);
+}));
 
 // PUT /api/videos/:id - Update video
 router.put('/:id', (req, res) => {

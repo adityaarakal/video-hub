@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Database = require('../utils/database');
+const { validateChannel, validatePagination, asyncHandler } = require('../middleware/validation');
 
 const channelDb = new Database('channels');
 const subscriptionDb = new Database('subscriptions');
@@ -29,13 +30,8 @@ router.get('/:id', (req, res) => {
 });
 
 // POST /api/channels - Create new channel
-router.post('/', (req, res) => {
-  try {
-    const { name, description, avatar, banner } = req.body;
-
-    if (!name) {
-      return res.status(400).json({ error: 'Channel name is required' });
-    }
+router.post('/', validateChannel, asyncHandler(async (req, res) => {
+  const { name, description, avatar, banner } = req.body;
 
     const channelId = name.toLowerCase().replace(/\s+/g, '-');
     
@@ -47,20 +43,17 @@ router.post('/', (req, res) => {
 
     const channel = channelDb.create({
       id: channelId,
-      name,
-      description: description || '',
+      name: name.trim(),
+      description: (description || '').trim(),
       subscribers: 0,
       isVerified: false,
-      avatar: avatar || name.charAt(0).toUpperCase(),
-      banner: banner || '',
+      avatar: (avatar || name.charAt(0).toUpperCase()).trim(),
+      banner: (banner || '').trim(),
       createdAt: new Date().toISOString()
     });
 
     res.status(201).json(channel);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+}));
 
 // PUT /api/channels/:id - Update channel
 router.put('/:id', (req, res) => {
@@ -95,7 +88,7 @@ router.delete('/:id', (req, res) => {
 });
 
 // GET /api/channels/:id/videos - Get videos for a channel
-router.get('/:id/videos', (req, res) => {
+router.get('/:id/videos', validatePagination, asyncHandler(async (req, res) => {
   try {
     const { limit = 20, offset = 0, page = 1 } = req.query;
     const videoDb = new Database('videos');
@@ -122,10 +115,7 @@ router.get('/:id/videos', (req, res) => {
       totalPages,
       hasMore: offsetNum + limitNum < total
     });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+}));
 
 // POST /api/channels/:id/subscribe - Subscribe to channel
 router.post('/:id/subscribe', (req, res) => {

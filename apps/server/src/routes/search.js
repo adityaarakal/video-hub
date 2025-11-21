@@ -1,15 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const Database = require('../utils/database');
+const { validateSearch, asyncHandler } = require('../middleware/validation');
 
 // GET /api/search - Search videos, channels, playlists
-router.get('/', (req, res) => {
-  try {
-    const { q, type = 'all', limit = 20, offset = 0, page = 1 } = req.query;
-
-    if (!q || q.trim() === '') {
-      return res.status(400).json({ error: 'Search query is required' });
-    }
+router.get('/', validateSearch, asyncHandler(async (req, res) => {
+  const { q, type = 'all', limit = 20, offset = 0, page = 1 } = req.query;
 
     const query = q.toLowerCase().trim();
     const pageNum = parseInt(page) || 1;
@@ -79,10 +75,7 @@ router.get('/', (req, res) => {
       totalPages,
       hasMore: offsetNum + limitNum < total
     });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+}));
 
 module.exports = router;
 

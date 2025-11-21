@@ -1,51 +1,48 @@
 const express = require('express');
 const router = express.Router();
 const Database = require('../utils/database');
+const { validateComment, validateReply, validatePagination, asyncHandler } = require('../middleware/validation');
 
 const commentDb = new Database('comments');
 
 // GET /api/comments - Get comments for a video
-router.get('/', (req, res) => {
-  try {
-    const { videoId, sortBy = 'top', limit = 20, offset = 0, page = 1 } = req.query;
-    
-    if (!videoId) {
-      return res.status(400).json({ error: 'videoId is required' });
-    }
-
-    let comments = commentDb.findBy('videoId', videoId);
-
-    // Sort comments
-    if (sortBy === 'newest') {
-      comments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    } else {
-      // Sort by likes (top comments)
-      comments.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-    }
-
-    // Calculate pagination
-    const pageNum = parseInt(page) || 1;
-    const limitNum = parseInt(limit) || 20;
-    const offsetNum = parseInt(offset) || (pageNum - 1) * limitNum;
-    const total = comments.length;
-    const totalPages = Math.ceil(total / limitNum);
-    
-    // Apply pagination
-    const paginatedComments = comments.slice(offsetNum, offsetNum + limitNum);
-
-    res.json({
-      comments: paginatedComments,
-      total,
-      limit: limitNum,
-      offset: offsetNum,
-      page: pageNum,
-      totalPages,
-      hasMore: offsetNum + limitNum < total
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+router.get('/', validatePagination, asyncHandler(async (req, res) => {
+  const { videoId, sortBy = 'top', limit = 20, offset = 0, page = 1 } = req.query;
+  
+  if (!videoId) {
+    return res.status(400).json({ error: 'videoId is required' });
   }
-});
+
+  let comments = commentDb.findBy('videoId', videoId);
+
+  // Sort comments
+  if (sortBy === 'newest') {
+    comments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  } else {
+    // Sort by likes (top comments)
+    comments.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+  }
+
+  // Calculate pagination
+  const pageNum = parseInt(page) || 1;
+  const limitNum = parseInt(limit) || 20;
+  const offsetNum = parseInt(offset) || (pageNum - 1) * limitNum;
+  const total = comments.length;
+  const totalPages = Math.ceil(total / limitNum);
+  
+  // Apply pagination
+  const paginatedComments = comments.slice(offsetNum, offsetNum + limitNum);
+
+  res.json({
+    comments: paginatedComments,
+    total,
+    limit: limitNum,
+    offset: offsetNum,
+    page: pageNum,
+    totalPages,
+    hasMore: offsetNum + limitNum < total
+  });
+}));
 
 // GET /api/comments/:id - Get comment by ID
 router.get('/:id', (req, res) => {
@@ -61,30 +58,22 @@ router.get('/:id', (req, res) => {
 });
 
 // POST /api/comments - Create new comment
-router.post('/', (req, res) => {
-  try {
-    const { videoId, text, author, avatar } = req.body;
+router.post('/', validateComment, asyncHandler(async (req, res) => {
+  const { videoId, text, author, avatar } = req.body;
 
-    if (!videoId || !text || !author) {
-      return res.status(400).json({ error: 'videoId, text, and author are required' });
-    }
+  const comment = commentDb.create({
+    videoId: videoId.trim(),
+    text: text.trim(),
+    author: author.trim(),
+    avatar: (avatar || author.charAt(0).toUpperCase()).trim(),
+    likes: 0,
+    dislikes: 0,
+    replies: [],
+    createdAt: new Date().toISOString()
+  });
 
-    const comment = commentDb.create({
-      videoId,
-      text,
-      author,
-      avatar: avatar || author.charAt(0).toUpperCase(),
-      likes: 0,
-      dislikes: 0,
-      replies: [],
-      createdAt: new Date().toISOString()
-    });
-
-    res.status(201).json(comment);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+  res.status(201).json(comment);
+}));
 
 // PUT /api/comments/:id - Update comment
 router.put('/:id', (req, res) => {
@@ -179,24 +168,19 @@ router.post('/:id/dislike', (req, res) => {
 });
 
 // POST /api/comments/:id/reply - Add reply to comment
-router.post('/:id/reply', (req, res) => {
-  try {
-    const comment = commentDb.findById(req.params.id);
-    if (!comment) {
-      return res.status(404).json({ error: 'Comment not found' });
-    }
+router.post('/:id/reply', validateReply, asyncHandler(async (req, res) => {
+  const comment = commentDb.findById(req.params.id);
+  if (!comment) {
+    return res.status(404).json({ error: 'Comment not found' });
+  }
 
-    const { text, author, avatar } = req.body;
-
-    if (!text || !author) {
-      return res.status(400).json({ error: 'text and author are required' });
-    }
+  const { text, author, avatar } = req.body;
 
     const reply = {
       id: Date.now(),
-      text,
-      author,
-      avatar: avatar || author.charAt(0).toUpperCase(),
+      text: text.trim(),
+      author: author.trim(),
+      avatar: (avatar || author.charAt(0).toUpperCase()).trim(),
       likes: 0,
       createdAt: new Date().toISOString()
     };
@@ -209,10 +193,7 @@ router.post('/:id/reply', (req, res) => {
     });
 
     res.json(updated);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+}));
 
 module.exports = router;
 

@@ -3,95 +3,80 @@ const router = express.Router();
 const Database = require('../utils/database');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { validateRegister, validateLogin, asyncHandler } = require('../middleware/validation');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'videohub-secret-key-change-in-production';
 const userDb = new Database('users');
 
 // POST /api/auth/register - Register new user
-router.post('/register', async (req, res) => {
-  try {
-    const { username, email, password } = req.body;
+router.post('/register', validateRegister, asyncHandler(async (req, res) => {
+  const { username, email, password } = req.body;
 
-    if (!username || !email || !password) {
-      return res.status(400).json({ error: 'Username, email, and password are required' });
-    }
+  // Check if user already exists
+  const existingUser = userDb.getAll().find(
+    u => u.email === email.toLowerCase() || u.username.toLowerCase() === username.toLowerCase()
+  );
 
-    // Check if user already exists
-    const existingUser = userDb.getAll().find(
-      u => u.email === email || u.username === username
-    );
-
-    if (existingUser) {
-      return res.status(400).json({ error: 'User already exists' });
-    }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = userDb.create({
-      username,
-      email,
-      password: hashedPassword,
-      avatar: username.charAt(0).toUpperCase(),
-      createdAt: new Date().toISOString()
-    });
-
-    // Generate token
-    const token = jwt.sign(
-      { userId: user.id, email: user.email },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    const { password: _, ...userData } = user;
-
-    res.status(201).json({
-      user: userData,
-      token
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  if (existingUser) {
+    return res.status(400).json({ error: 'User with this email or username already exists' });
   }
-});
+
+  // Hash password
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const user = userDb.create({
+    username: username.trim(),
+    email: email.toLowerCase().trim(),
+    password: hashedPassword,
+    avatar: username.charAt(0).toUpperCase(),
+    createdAt: new Date().toISOString()
+  });
+
+  // Generate token
+  const token = jwt.sign(
+    { userId: user.id, email: user.email },
+    JWT_SECRET,
+    { expiresIn: '7d' }
+  );
+
+  const { password: _, ...userData } = user;
+
+  res.status(201).json({
+    user: userData,
+    token
+  });
+}));
 
 // POST /api/auth/login - Login user
-router.post('/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
+router.post('/login', validateLogin, asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
-    }
+  const user = userDb.getAll().find(u => u.email === email.toLowerCase());
 
-    const user = userDb.getAll().find(u => u.email === email);
-
-    if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    const isValidPassword = await bcrypt.compare(password, user.password);
-
-    if (!isValidPassword) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    // Generate token
-    const token = jwt.sign(
-      { userId: user.id, email: user.email },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    const { password: _, ...userData } = user;
-
-    res.json({
-      user: userData,
-      token
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  if (!user) {
+    return res.status(401).json({ error: 'Invalid email or password' });
   }
-});
+
+  const isValidPassword = await bcrypt.compare(password, user.password);
+
+  if (!isValidPassword) {
+    return res.status(401).json({ error: 'Invalid email or password' });
+  }
+
+  // Generate token
+  const token = jwt.sign(
+    { userId: user.id, email: user.email },
+    JWT_SECRET,
+    { expiresIn: '7d' }
+  );
+
+  const { password: _, ...userData } = user;
+
+  res.json({
+    user: userData,
+    token
+  });
+}));
 
 // GET /api/auth/me - Get current user (requires token)
 router.get('/me', (req, res) => {
