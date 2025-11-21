@@ -16,21 +16,26 @@ try {
 class Database {
   constructor(fileName) {
     this.fileName = fileName;
-    
-    // Use MongoDB if enabled and available, otherwise use JSON files
-    if (USE_MONGODB && MongoDBDatabase) {
+    this.filePath = path.join(dataDir, `${fileName}.json`);
+  }
+
+  // Check dynamically if MongoDB should be used
+  get useMongoDB() {
+    const USE_MONGODB = process.env.USE_MONGODB !== 'false';
+    return USE_MONGODB && MongoDBDatabase && mongoose.connection.readyState === 1;
+  }
+
+  // Get MongoDB instance if available
+  get mongoDb() {
+    if (!this._mongoDb && this.useMongoDB) {
       try {
-        this.mongoDb = new MongoDBDatabase(fileName);
-        this.useMongoDB = true;
+        this._mongoDb = new MongoDBDatabase(this.fileName);
       } catch (error) {
-        console.warn(`Failed to initialize MongoDB for ${fileName}, falling back to JSON:`, error.message);
-        this.useMongoDB = false;
-        this.filePath = path.join(dataDir, `${fileName}.json`);
+        console.warn(`Failed to initialize MongoDB for ${this.fileName}, falling back to JSON:`, error.message);
+        return null;
       }
-    } else {
-      this.useMongoDB = false;
-      this.filePath = path.join(dataDir, `${fileName}.json`);
     }
+    return this._mongoDb;
   }
 
   // MongoDB methods
