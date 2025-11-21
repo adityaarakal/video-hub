@@ -3,9 +3,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { useToast } from '../context/ToastContext';
 import MobileMenu from './MobileMenu';
+import KeyboardShortcutsHelp from './KeyboardShortcutsHelp';
 import api from '../services/api';
 import './Header.css';
-import { Menu, X, Search, Mic, Plus, Bell, User, Play, ChevronDown, LogOut, Clock } from 'lucide-react';
+import { Menu, X, Search, Mic, Plus, Bell, User, Play, ChevronDown, LogOut, Clock, Keyboard } from 'lucide-react';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -94,8 +95,16 @@ const Header = () => {
       }
     };
 
+    const handleShowShortcuts = () => {
+      setShowKeyboardShortcuts(true);
+    };
+
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('showKeyboardShortcuts', handleShowShortcuts);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('showKeyboardShortcuts', handleShowShortcuts);
+    };
   }, []);
 
   const handleSearch = (e) => {
@@ -128,6 +137,7 @@ const Header = () => {
   return (
     <>
       <MobileMenu isOpen={showMobileMenu} onClose={() => setShowMobileMenu(false)} />
+      <KeyboardShortcutsHelp isOpen={showKeyboardShortcuts} onClose={() => setShowKeyboardShortcuts(false)} />
       <header className="header">
         <div className="header-container">
           <div className="header-start">
@@ -143,29 +153,68 @@ const Header = () => {
         </div>
         
         <div className="header-center">
-          <form className="search-form" onSubmit={handleSearch}>
-            <input 
-              type="text" 
-              className="search-input" 
-              placeholder="Search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            {searchQuery && (
-              <button type="button" className="search-clear" aria-label="Clear" onClick={handleClearSearch}>
-                <X size={20} />
+          <div className="search-wrapper" ref={searchInputRef}>
+            <form className="search-form" onSubmit={handleSearch}>
+              <input 
+                ref={searchInputRef}
+                type="text" 
+                className="search-input" 
+                placeholder="Search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => searchQuery.trim().length > 2 && setShowSearchSuggestions(true)}
+              />
+              {searchQuery && (
+                <button type="button" className="search-clear" aria-label="Clear" onClick={handleClearSearch}>
+                  <X size={20} />
+                </button>
+              )}
+              <button type="submit" className="search-button" aria-label="Search">
+                {isSearching ? (
+                  <div className="search-spinner"></div>
+                ) : (
+                  <Search size={20} />
+                )}
               </button>
+            </form>
+            {showSearchSuggestions && searchSuggestions.length > 0 && (
+              <div className="search-suggestions">
+                {searchSuggestions.map((suggestion, index) => (
+                  <div
+                    key={index}
+                    className="search-suggestion-item"
+                    onClick={() => handleSuggestionClick(suggestion)}
+                  >
+                    <Search size={16} />
+                    <div className="suggestion-content">
+                      <div className="suggestion-title">{suggestion.title}</div>
+                      {suggestion.channel && (
+                        <div className="suggestion-meta">{suggestion.channel}</div>
+                      )}
+                      <div className="suggestion-type">{suggestion.type}</div>
+                    </div>
+                  </div>
+                ))}
+                <div className="search-suggestion-footer">
+                  Press Enter to search for "{searchQuery}"
+                </div>
+              </div>
             )}
-            <button type="submit" className="search-button" aria-label="Search">
-              <Search size={20} />
-            </button>
-          </form>
+          </div>
           <button className="voice-search-button" aria-label="Search with your voice" onClick={handleVoiceSearch}>
             <Mic size={20} />
           </button>
         </div>
         
         <div className="header-end">
+          <button 
+            className="icon-button" 
+            aria-label="Keyboard Shortcuts" 
+            onClick={() => setShowKeyboardShortcuts(true)}
+            title="Keyboard Shortcuts (?)"
+          >
+            <Keyboard size={20} />
+          </button>
           <div className="create-menu-wrapper">
             <button 
               className="create-button"
