@@ -13,7 +13,7 @@ router.get('/', validatePagination, asyncHandler(async (req, res) => {
     return res.status(400).json({ error: 'videoId is required' });
   }
 
-  let comments = commentDb.findBy('videoId', videoId);
+  let comments = await commentDb.findBy('videoId', videoId);
 
   // Sort comments
   if (sortBy === 'newest') {
@@ -45,23 +45,19 @@ router.get('/', validatePagination, asyncHandler(async (req, res) => {
 }));
 
 // GET /api/comments/:id - Get comment by ID
-router.get('/:id', (req, res) => {
-  try {
-    const comment = commentDb.findById(req.params.id);
+router.get('/:id', asyncHandler(async (req, res) => {
+  const comment = await commentDb.findById(req.params.id);
     if (!comment) {
       return res.status(404).json({ error: 'Comment not found' });
     }
     res.json(comment);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+}));
 
 // POST /api/comments - Create new comment
 router.post('/', validateComment, asyncHandler(async (req, res) => {
   const { videoId, text, author, avatar } = req.body;
 
-  const comment = commentDb.create({
+  const comment = await commentDb.create({
     videoId: videoId.trim(),
     text: text.trim(),
     author: author.trim(),
@@ -76,100 +72,84 @@ router.post('/', validateComment, asyncHandler(async (req, res) => {
 }));
 
 // PUT /api/comments/:id - Update comment
-router.put('/:id', (req, res) => {
-  try {
-    const comment = commentDb.findById(req.params.id);
-    if (!comment) {
-      return res.status(404).json({ error: 'Comment not found' });
-    }
-
-    const updates = req.body;
-    const updated = commentDb.update(comment.id, updates);
-
-    res.json(updated);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+router.put('/:id', asyncHandler(async (req, res) => {
+  const comment = await commentDb.findById(req.params.id);
+  if (!comment) {
+    return res.status(404).json({ error: 'Comment not found' });
   }
-});
+
+  const updates = req.body;
+  const updated = await commentDb.update(comment.id, updates);
+
+  res.json(updated);
+}));
 
 // DELETE /api/comments/:id - Delete comment
-router.delete('/:id', (req, res) => {
-  try {
-    const comment = commentDb.findById(req.params.id);
-    if (!comment) {
-      return res.status(404).json({ error: 'Comment not found' });
-    }
-
-    commentDb.delete(comment.id);
-    res.json({ message: 'Comment deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+router.delete('/:id', asyncHandler(async (req, res) => {
+  const comment = await commentDb.findById(req.params.id);
+  if (!comment) {
+    return res.status(404).json({ error: 'Comment not found' });
   }
-});
+
+  await commentDb.delete(comment.id);
+  res.json({ message: 'Comment deleted successfully' });
+}));
 
 // POST /api/comments/:id/like - Like comment
-router.post('/:id/like', (req, res) => {
-  try {
-    const comment = commentDb.findById(req.params.id);
-    if (!comment) {
-      return res.status(404).json({ error: 'Comment not found' });
-    }
-
-    const { action } = req.body; // 'like' or 'unlike'
-    const currentLikes = comment.likes || 0;
-    const currentDislikes = comment.dislikes || 0;
-
-    if (action === 'like') {
-      commentDb.update(comment.id, {
-        likes: currentLikes + 1,
-        dislikes: Math.max(0, currentDislikes - 1)
-      });
-    } else if (action === 'unlike') {
-      commentDb.update(comment.id, {
-        likes: Math.max(0, currentLikes - 1)
-      });
-    }
-
-    const updated = commentDb.findById(req.params.id);
-    res.json(updated);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+router.post('/:id/like', asyncHandler(async (req, res) => {
+  const comment = await commentDb.findById(req.params.id);
+  if (!comment) {
+    return res.status(404).json({ error: 'Comment not found' });
   }
-});
+
+  const { action } = req.body; // 'like' or 'unlike'
+  const currentLikes = comment.likes || 0;
+  const currentDislikes = comment.dislikes || 0;
+
+  if (action === 'like') {
+    await commentDb.update(comment.id, {
+      likes: currentLikes + 1,
+      dislikes: Math.max(0, currentDislikes - 1)
+    });
+  } else if (action === 'unlike') {
+    await commentDb.update(comment.id, {
+      likes: Math.max(0, currentLikes - 1)
+    });
+  }
+
+  const updated = await commentDb.findById(req.params.id);
+  res.json(updated);
+}));
 
 // POST /api/comments/:id/dislike - Dislike comment
-router.post('/:id/dislike', (req, res) => {
-  try {
-    const comment = commentDb.findById(req.params.id);
-    if (!comment) {
-      return res.status(404).json({ error: 'Comment not found' });
-    }
-
-    const { action } = req.body; // 'dislike' or 'undislike'
-    const currentLikes = comment.likes || 0;
-    const currentDislikes = comment.dislikes || 0;
-
-    if (action === 'dislike') {
-      commentDb.update(comment.id, {
-        dislikes: currentDislikes + 1,
-        likes: Math.max(0, currentLikes - 1)
-      });
-    } else if (action === 'undislike') {
-      commentDb.update(comment.id, {
-        dislikes: Math.max(0, currentDislikes - 1)
-      });
-    }
-
-    const updated = commentDb.findById(req.params.id);
-    res.json(updated);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+router.post('/:id/dislike', asyncHandler(async (req, res) => {
+  const comment = await commentDb.findById(req.params.id);
+  if (!comment) {
+    return res.status(404).json({ error: 'Comment not found' });
   }
-});
+
+  const { action } = req.body; // 'dislike' or 'undislike'
+  const currentLikes = comment.likes || 0;
+  const currentDislikes = comment.dislikes || 0;
+
+  if (action === 'dislike') {
+    await commentDb.update(comment.id, {
+      dislikes: currentDislikes + 1,
+      likes: Math.max(0, currentLikes - 1)
+    });
+  } else if (action === 'undislike') {
+    await commentDb.update(comment.id, {
+      dislikes: Math.max(0, currentDislikes - 1)
+    });
+  }
+
+  const updated = await commentDb.findById(req.params.id);
+  res.json(updated);
+}));
 
 // POST /api/comments/:id/reply - Add reply to comment
 router.post('/:id/reply', validateReply, asyncHandler(async (req, res) => {
-  const comment = commentDb.findById(req.params.id);
+  const comment = await commentDb.findById(req.params.id);
   if (!comment) {
     return res.status(404).json({ error: 'Comment not found' });
   }
@@ -188,7 +168,7 @@ router.post('/:id/reply', validateReply, asyncHandler(async (req, res) => {
     const replies = comment.replies || [];
     replies.push(reply);
 
-    const updated = commentDb.update(comment.id, {
+    const updated = await commentDb.update(comment.id, {
       replies
     });
 

@@ -13,7 +13,8 @@ router.post('/register', validateRegister, asyncHandler(async (req, res) => {
   const { username, email, password } = req.body;
 
   // Check if user already exists
-  const existingUser = userDb.getAll().find(
+  const allUsers = await userDb.getAll();
+  const existingUser = allUsers.find(
     u => u.email === email.toLowerCase() || u.username.toLowerCase() === username.toLowerCase()
   );
 
@@ -24,7 +25,7 @@ router.post('/register', validateRegister, asyncHandler(async (req, res) => {
   // Hash password
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const user = userDb.create({
+  const user = await userDb.create({
     username: username.trim(),
     email: email.toLowerCase().trim(),
     password: hashedPassword,
@@ -52,7 +53,8 @@ router.post('/register', validateRegister, asyncHandler(async (req, res) => {
 router.post('/login', validateLogin, asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  const user = userDb.getAll().find(u => u.email === email.toLowerCase());
+  const allUsers = await userDb.getAll();
+  const user = allUsers.find(u => u.email === email.toLowerCase());
 
   if (!user) {
     return res.status(401).json({ error: 'Invalid email or password' });
@@ -80,31 +82,27 @@ router.post('/login', validateLogin, asyncHandler(async (req, res) => {
 }));
 
 // GET /api/auth/me - Get current user (requires token)
-router.get('/me', (req, res) => {
-  try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
+router.get('/me', asyncHandler(async (req, res) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
 
-    if (!token) {
-      return res.status(401).json({ error: 'No token provided' });
-    }
-
-    try {
-      const decoded = jwt.verify(token, JWT_SECRET);
-      const user = userDb.findById(decoded.userId);
-
-      if (!user) {
-        return res.status(404).json({ error: 'User not found' });
-      }
-
-      const { password: _, ...userData } = user;
-      res.json(userData);
-    } catch (error) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  if (!token) {
+    return res.status(401).json({ error: 'No token provided' });
   }
-});
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = await userDb.findById(decoded.userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const { password: _, ...userData } = user;
+    res.json(userData);
+  } catch (error) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+}));
 
 module.exports = router;
 
