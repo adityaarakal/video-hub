@@ -84,27 +84,6 @@ const VideoDetails = ({ video }) => {
     }
   };
 
-  const handleSubscribe = async () => {
-    if (!user) {
-      showWarning('Please login to subscribe', 3000);
-      navigate('/login');
-      return;
-    }
-    
-    try {
-      if (isSubscribed) {
-        await unsubscribe(channelId);
-        setIsSubscribed(false);
-        showInfo(`Unsubscribed from ${channelName}`, 2000);
-      } else {
-        await subscribe(channelId, channelName);
-        setIsSubscribed(true);
-        showSuccess(`Subscribed to ${channelName}!`, 2000);
-      }
-    } catch (error) {
-      showError('Failed to update subscription', 3000);
-    }
-  };
 
   const handleSaveToPlaylist = async (playlistId) => {
     if (!user) {
