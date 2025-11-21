@@ -32,6 +32,13 @@ const KeyboardShortcuts = () => {
         }
       }
 
+      // Question mark - Show keyboard shortcuts
+      if (e.key === '?' && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        const event = new CustomEvent('showKeyboardShortcuts');
+        document.dispatchEvent(event);
+      }
+
       // Escape - Close modals/dropdowns
       if (e.key === 'Escape') {
         const dropdowns = document.querySelectorAll('.dropdown-menu');

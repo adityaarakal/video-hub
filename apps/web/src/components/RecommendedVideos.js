@@ -215,7 +215,21 @@ const RecommendedVideos = ({ currentVideoId }) => {
           onMouseLeave={() => setHoveredVideo(null)}
         >
           <div className="video-thumbnail">
-            <div className={`thumbnail-placeholder ${hoveredVideo === video.id ? 'hovered' : ''}`}>
+            {video.thumbnail ? (
+              <img 
+                src={video.thumbnail} 
+                alt={video.title}
+                className="thumbnail-image"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+            ) : null}
+            <div 
+              className={`thumbnail-placeholder ${hoveredVideo === video.id ? 'hovered' : ''}`}
+              style={{ display: video.thumbnail ? 'none' : 'flex' }}
+            >
               {hoveredVideo === video.id && (
                 <div className="play-overlay">
                   <Play size={32} fill="currentColor" />

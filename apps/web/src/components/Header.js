@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { useToast } from '../context/ToastContext';
 import MobileMenu from './MobileMenu';
+import api from '../services/api';
 import './Header.css';
-import { Menu, X, Search, Mic, Plus, Bell, User, Play, ChevronDown, LogOut } from 'lucide-react';
+import { Menu, X, Search, Mic, Plus, Bell, User, Play, ChevronDown, LogOut, Clock } from 'lucide-react';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -22,14 +23,84 @@ const Header = () => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showCreateMenu, setShowCreateMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
+  const [searchSuggestions, setSearchSuggestions] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
+  const searchTimeoutRef = useRef(null);
+  const searchInputRef = useRef(null);
+
+  // Search autocomplete/suggestions
+  useEffect(() => {
+    if (searchQuery.trim().length > 2) {
+      setIsSearching(true);
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+      
+      searchTimeoutRef.current = setTimeout(async () => {
+        try {
+          const results = await api.search(searchQuery.trim(), 'all', 5);
+          const suggestions = [];
+          
+          if (results.videos) {
+            suggestions.push(...results.videos.slice(0, 3).map(v => ({
+              type: 'video',
+              title: v.title,
+              id: v.id,
+              channel: v.channelName
+            })));
+          }
+          
+          if (results.channels) {
+            suggestions.push(...results.channels.slice(0, 2).map(c => ({
+              type: 'channel',
+              title: c.name,
+              id: c.id
+            })));
+          }
+          
+          setSearchSuggestions(suggestions);
+          setShowSearchSuggestions(true);
+        } catch (error) {
+          console.error('Search suggestions error:', error);
+        } finally {
+          setIsSearching(false);
+        }
+      }, 300);
+    } else {
+      setSearchSuggestions([]);
+      setShowSearchSuggestions(false);
+    }
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchQuery]);
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchInputRef.current && !searchInputRef.current.contains(e.target)) {
+        setShowSearchSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleSearch = (e) => {
     e.preventDefault();
+    setShowSearchSuggestions(false);
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     }
@@ -37,10 +108,21 @@ const Header = () => {
 
   const handleClearSearch = () => {
     setSearchQuery('');
+    setShowSearchSuggestions(false);
   };
 
   const handleVoiceSearch = () => {
     info('Voice search feature - Click allow to enable microphone', 4000);
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    if (suggestion.type === 'video') {
+      navigate(`/?v=${suggestion.id}`);
+    } else if (suggestion.type === 'channel') {
+      navigate(`/channel/${suggestion.id}`);
+    }
+    setShowSearchSuggestions(false);
+    setSearchQuery('');
   };
 
   return (
