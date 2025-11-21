@@ -12,6 +12,7 @@ const playlistRoutes = require('./routes/playlists');
 const userRoutes = require('./routes/users');
 const searchRoutes = require('./routes/search');
 const authRoutes = require('./routes/auth');
+const uploadRoutes = require('./routes/upload');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -20,6 +21,13 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Serve static files (uploads)
+const uploadsDir = path.join(__dirname, '../uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+app.use('/uploads', express.static(uploadsDir));
 
 // Initialize data directory
 const dataDir = path.join(__dirname, '../data');
@@ -334,6 +342,7 @@ app.use('/api/playlists', playlistRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

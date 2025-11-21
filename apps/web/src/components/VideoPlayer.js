@@ -280,6 +280,7 @@ const VideoPlayer = ({ video }) => {
             <video
               ref={videoRef}
               src={video.videoUrl}
+              poster={video?.thumbnail || ''}
               className="video-element"
               playsInline
               preload="metadata"

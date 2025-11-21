@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import Pagination from '../components/Pagination';
 import { Play } from 'lucide-react';
 import './SearchResults.css';
 
@@ -9,6 +10,10 @@ const SearchResults = () => {
   const navigate = useNavigate();
   const [searchResults, setSearchResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalResults, setTotalResults] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
   const query = searchParams.get('q') || '';
 
   useEffect(() => {
@@ -20,8 +25,11 @@ const SearchResults = () => {
 
       setIsLoading(true);
       try {
-        const results = await api.search(query, 'videos', 20);
+        const results = await api.search(query, 'videos', 20, currentPage);
         setSearchResults(results.results?.videos || []);
+        setTotalResults(results.total || 0);
+        setTotalPages(results.totalPages || 1);
+        setHasMore(results.hasMore || false);
       } catch (error) {
         console.error('Search failed:', error);
         setSearchResults([]);
@@ -31,7 +39,7 @@ const SearchResults = () => {
     };
 
     performSearch();
-  }, [query]);
+  }, [query, currentPage]);
 
   const formatNumber = (num) => {
     if (num >= 1000000) {
@@ -66,12 +74,17 @@ const SearchResults = () => {
     navigate(`/?v=${video.id}`);
   };
 
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="search-results-page">
       <div className="search-results-container">
         <div className="search-results-header">
           <h2>Search Results for "{query}"</h2>
-          <span className="results-count">{searchResults.length} results</span>
+          <span className="results-count">{totalResults.toLocaleString()} results</span>
         </div>
 
         {isLoading ? (
@@ -126,6 +139,15 @@ const SearchResults = () => {
             <p>No results found for "{query}"</p>
             <p className="no-results-suggestion">Try different keywords or check your spelling</p>
           </div>
+        )}
+
+        {!isLoading && searchResults.length > 0 && totalPages > 1 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            hasMore={hasMore}
+          />
         )}
       </div>
     </div>

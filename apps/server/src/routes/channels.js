@@ -97,12 +97,31 @@ router.delete('/:id', (req, res) => {
 // GET /api/channels/:id/videos - Get videos for a channel
 router.get('/:id/videos', (req, res) => {
   try {
+    const { limit = 20, offset = 0, page = 1 } = req.query;
     const videoDb = new Database('videos');
-    const videos = videoDb.findBy('channelId', req.params.id);
+    let videos = videoDb.findBy('channelId', req.params.id);
     
     videos.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     
-    res.json({ videos, total: videos.length });
+    // Calculate pagination
+    const pageNum = parseInt(page) || 1;
+    const limitNum = parseInt(limit) || 20;
+    const offsetNum = parseInt(offset) || (pageNum - 1) * limitNum;
+    const total = videos.length;
+    const totalPages = Math.ceil(total / limitNum);
+    
+    // Apply pagination
+    const paginatedVideos = videos.slice(offsetNum, offsetNum + limitNum);
+    
+    res.json({ 
+      videos: paginatedVideos, 
+      total,
+      limit: limitNum,
+      offset: offsetNum,
+      page: pageNum,
+      totalPages,
+      hasMore: offsetNum + limitNum < total
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

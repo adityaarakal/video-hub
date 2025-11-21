@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { useToast } from '../context/ToastContext';
 import api from '../services/api';
+import Pagination from './Pagination';
 import './CommentsSection.css';
 import { ArrowUpDown, ThumbsUp, ThumbsDown, ChevronDown, ChevronUp } from 'lucide-react';
 
@@ -17,6 +18,9 @@ const CommentsSection = ({ videoId }) => {
   const [isCommentFocused, setIsCommentFocused] = useState(false);
   const [loading, setLoading] = useState(true);
   const [totalComments, setTotalComments] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
 
   useEffect(() => {
     const loadComments = async () => {
@@ -25,7 +29,7 @@ const CommentsSection = ({ videoId }) => {
       setLoading(true);
       try {
         const sortType = sortBy === 'Newest first' ? 'newest' : 'top';
-        const data = await api.getComments(videoId, sortType);
+        const data = await api.getComments(videoId, sortType, 20, currentPage);
         const formattedComments = (data.comments || []).map(comment => ({
           ...comment,
           isLiked: false,
@@ -35,6 +39,8 @@ const CommentsSection = ({ videoId }) => {
         }));
         setComments(formattedComments);
         setTotalComments(data.total || formattedComments.length);
+        setTotalPages(data.totalPages || 1);
+        setHasMore(data.hasMore || false);
       } catch (error) {
         console.error('Failed to load comments:', error);
         setComments([]);
@@ -44,7 +50,7 @@ const CommentsSection = ({ videoId }) => {
     };
 
     loadComments();
-  }, [videoId, sortBy]);
+  }, [videoId, sortBy, currentPage]);
 
   const getTimeAgo = (dateString) => {
     const date = new Date(dateString);
@@ -150,7 +156,7 @@ const CommentsSection = ({ videoId }) => {
         });
         
         // Reload comments to get updated reply count
-        const data = await api.getComments(videoId, sortBy === 'Newest first' ? 'newest' : 'top');
+        const data = await api.getComments(videoId, sortBy === 'Newest first' ? 'newest' : 'top', 20, currentPage);
         const formattedComments = (data.comments || []).map(comment => ({
           ...comment,
           isLiked: false,
@@ -159,6 +165,8 @@ const CommentsSection = ({ videoId }) => {
           timeAgo: comment.createdAt ? getTimeAgo(comment.createdAt) : 'Unknown'
         }));
         setComments(formattedComments);
+        setTotalPages(data.totalPages || 1);
+        setHasMore(data.hasMore || false);
         
         setReplyText('');
         setReplyingTo(null);
@@ -173,7 +181,12 @@ const CommentsSection = ({ videoId }) => {
   const handleSort = (sortType) => {
     setSortBy(sortType);
     setShowSortMenu(false);
-    // In a real app, this would sort the comments
+    setCurrentPage(1); // Reset to first page when sorting changes
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const formatNumber = (num) => {
@@ -343,6 +356,15 @@ const CommentsSection = ({ videoId }) => {
           </div>
         ))}
       </div>
+      
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          hasMore={hasMore}
+        />
+      )}
     </div>
   );
 };

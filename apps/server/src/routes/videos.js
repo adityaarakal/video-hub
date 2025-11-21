@@ -7,7 +7,7 @@ const videoDb = new Database('videos');
 // GET /api/videos - Get all videos
 router.get('/', (req, res) => {
   try {
-    const { channelId, limit = 50, offset = 0 } = req.query;
+    const { channelId, limit = 20, offset = 0, page = 1 } = req.query;
     let videos = videoDb.getAll();
 
     if (channelId) {
@@ -17,13 +17,24 @@ router.get('/', (req, res) => {
     // Sort by createdAt (newest first)
     videos.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-    const paginated = videos.slice(parseInt(offset), parseInt(offset) + parseInt(limit));
+    // Calculate pagination
+    const pageNum = parseInt(page) || 1;
+    const limitNum = parseInt(limit) || 20;
+    const offsetNum = parseInt(offset) || (pageNum - 1) * limitNum;
+    const total = videos.length;
+    const totalPages = Math.ceil(total / limitNum);
+    
+    // Apply pagination
+    const paginated = videos.slice(offsetNum, offsetNum + limitNum);
 
     res.json({
       videos: paginated,
-      total: videos.length,
-      limit: parseInt(limit),
-      offset: parseInt(offset)
+      total,
+      limit: limitNum,
+      offset: offsetNum,
+      page: pageNum,
+      totalPages,
+      hasMore: offsetNum + limitNum < total
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

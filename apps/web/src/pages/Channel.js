@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { useToast } from '../context/ToastContext';
 import api from '../services/api';
+import Pagination from '../components/Pagination';
 import { Play, CheckCircle2, Bell, BellOff } from 'lucide-react';
 import './Channel.css';
 
@@ -16,6 +17,10 @@ const Channel = () => {
   const [videos, setVideos] = useState([]);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalVideos, setTotalVideos] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
 
   useEffect(() => {
     const loadChannel = async () => {
@@ -35,8 +40,11 @@ const Channel = () => {
         }
 
         // Load channel videos
-        const videosData = await api.getChannelVideos(channelId);
+        const videosData = await api.getChannelVideos(channelId, 20, currentPage);
         setVideos(videosData.videos || []);
+        setTotalVideos(videosData.total || 0);
+        setTotalPages(videosData.totalPages || 1);
+        setHasMore(videosData.hasMore || false);
       } catch (error) {
         console.error('Failed to load channel:', error);
       } finally {
@@ -47,7 +55,7 @@ const Channel = () => {
     if (channelId) {
       loadChannel();
     }
-  }, [channelId, user]);
+  }, [channelId, user, currentPage]);
 
   const formatNumber = (num) => {
     if (num >= 1000000) {
@@ -115,6 +123,11 @@ const Channel = () => {
     navigate(`/?v=${videoId}`);
   };
 
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="channel-page">
       <div className="channel-banner">
@@ -133,7 +146,7 @@ const Channel = () => {
             <div className="channel-stats">
               <span>{formatNumber(channelInfo.subscribers || 0)} subscribers</span>
               <span className="separator">•</span>
-              <span>{videos.length} videos</span>
+              <span>{totalVideos || videos.length} videos</span>
             </div>
             <button 
               className={`channel-subscribe-btn ${isSubscribed ? 'subscribed' : ''}`}
@@ -177,41 +190,52 @@ const Channel = () => {
 
         <div className="channel-content">
           {activeTab === 'videos' && (
-            <div className="channel-videos-grid">
-              {videos.map(video => (
-                <div 
-                  key={video.id} 
-                  className="channel-video-card"
-                  onClick={() => handleVideoClick(video.id)}
-                >
-                  <div className="channel-video-thumbnail">
-                    {video.thumbnail && video.thumbnail.trim() !== '' ? (
-                      <img 
-                        src={video.thumbnail} 
-                        alt={video.title}
-                        className="thumbnail-image"
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                          e.target.nextSibling.style.display = 'flex';
-                        }}
-                      />
-                    ) : null}
-                    <div className="thumbnail-placeholder" style={{ display: (video.thumbnail && video.thumbnail.trim() !== '') ? 'none' : 'flex' }}>
-                      <Play size={32} fill="currentColor" />
+            <>
+              <div className="channel-videos-grid">
+                {videos.map(video => (
+                  <div 
+                    key={video.id} 
+                    className="channel-video-card"
+                    onClick={() => handleVideoClick(video.id)}
+                  >
+                    <div className="channel-video-thumbnail">
+                      {video.thumbnail && video.thumbnail.trim() !== '' ? (
+                        <img 
+                          src={video.thumbnail} 
+                          alt={video.title}
+                          className="thumbnail-image"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div className="thumbnail-placeholder" style={{ display: (video.thumbnail && video.thumbnail.trim() !== '') ? 'none' : 'flex' }}>
+                        <Play size={32} fill="currentColor" />
+                      </div>
+                      <span className="video-duration">
+                        {video.duration ? (typeof video.duration === 'number' ? formatTime(video.duration) : video.duration) : '0:00'}
+                      </span>
                     </div>
-                    <span className="video-duration">
-                      {video.duration ? (typeof video.duration === 'number' ? formatTime(video.duration) : video.duration) : '0:00'}
-                    </span>
+                    <h3 className="channel-video-title">{video.title}</h3>
+                    <div className="channel-video-meta">
+                      <span>{typeof video.views === 'number' ? formatNumber(video.views) + ' views' : video.views}</span>
+                      <span className="separator">•</span>
+                      <span>{video.createdAt ? getTimeAgo(video.createdAt) : video.timeAgo || 'Unknown'}</span>
+                    </div>
                   </div>
-                  <h3 className="channel-video-title">{video.title}</h3>
-                  <div className="channel-video-meta">
-                    <span>{typeof video.views === 'number' ? formatNumber(video.views) + ' views' : video.views}</span>
-                    <span className="separator">•</span>
-                    <span>{video.createdAt ? getTimeAgo(video.createdAt) : video.timeAgo || 'Unknown'}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+              
+              {totalPages > 1 && (
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                  hasMore={hasMore}
+                />
+              )}
+            </>
           )}
 
           {activeTab === 'playlists' && (

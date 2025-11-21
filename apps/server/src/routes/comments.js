@@ -7,7 +7,7 @@ const commentDb = new Database('comments');
 // GET /api/comments - Get comments for a video
 router.get('/', (req, res) => {
   try {
-    const { videoId, sortBy = 'top' } = req.query;
+    const { videoId, sortBy = 'top', limit = 20, offset = 0, page = 1 } = req.query;
     
     if (!videoId) {
       return res.status(400).json({ error: 'videoId is required' });
@@ -23,9 +23,24 @@ router.get('/', (req, res) => {
       comments.sort((a, b) => (b.likes || 0) - (a.likes || 0));
     }
 
+    // Calculate pagination
+    const pageNum = parseInt(page) || 1;
+    const limitNum = parseInt(limit) || 20;
+    const offsetNum = parseInt(offset) || (pageNum - 1) * limitNum;
+    const total = comments.length;
+    const totalPages = Math.ceil(total / limitNum);
+    
+    // Apply pagination
+    const paginatedComments = comments.slice(offsetNum, offsetNum + limitNum);
+
     res.json({
-      comments,
-      total: comments.length
+      comments: paginatedComments,
+      total,
+      limit: limitNum,
+      offset: offsetNum,
+      page: pageNum,
+      totalPages,
+      hasMore: offsetNum + limitNum < total
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

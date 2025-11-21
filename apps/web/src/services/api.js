@@ -109,8 +109,8 @@ class ApiService {
   }
 
   // Comments
-  async getComments(videoId, sortBy = 'top') {
-    return this.request(`/comments?videoId=${videoId}&sortBy=${sortBy}`);
+  async getComments(videoId, sortBy = 'top', limit = 20, page = 1) {
+    return this.request(`/comments?videoId=${videoId}&sortBy=${sortBy}&limit=${limit}&page=${page}`);
   }
 
   async createComment(commentData) {
@@ -163,8 +163,8 @@ class ApiService {
     return this.request(`/channels/${id}`);
   }
 
-  async getChannelVideos(channelId) {
-    return this.request(`/channels/${channelId}/videos`);
+  async getChannelVideos(channelId, limit = 20, page = 1) {
+    return this.request(`/channels/${channelId}/videos?limit=${limit}&page=${page}`);
   }
 
   async checkSubscription(channelId, userId) {
@@ -265,8 +265,8 @@ class ApiService {
   }
 
   // Search
-  async search(query, type = 'all', limit = 20) {
-    return this.request(`/search?q=${encodeURIComponent(query)}&type=${type}&limit=${limit}`);
+  async search(query, type = 'all', limit = 20, page = 1) {
+    return this.request(`/search?q=${encodeURIComponent(query)}&type=${type}&limit=${limit}&page=${page}`);
   }
 
   // Auth
@@ -298,6 +298,84 @@ class ApiService {
 
   logout() {
     this.setToken(null);
+  }
+
+  // Upload
+  async uploadVideo(formData, onProgress) {
+    const url = `${this.baseURL}/upload/video`;
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+
+      xhr.upload.addEventListener('progress', (e) => {
+        if (e.lengthComputable && onProgress) {
+          const percentComplete = (e.loaded / e.total) * 100;
+          onProgress(percentComplete);
+        }
+      });
+
+      xhr.addEventListener('load', () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const response = JSON.parse(xhr.responseText);
+            resolve(response);
+          } catch (error) {
+            reject(new Error('Invalid response from server'));
+          }
+        } else {
+          try {
+            const error = JSON.parse(xhr.responseText);
+            reject(new Error(error.error || 'Upload failed'));
+          } catch {
+            reject(new Error('Upload failed'));
+          }
+        }
+      });
+
+      xhr.addEventListener('error', () => {
+        reject(new Error('Network error during upload'));
+      });
+
+      xhr.open('POST', url);
+      if (this.token) {
+        xhr.setRequestHeader('Authorization', `Bearer ${this.token}`);
+      }
+      xhr.send(formData);
+    });
+  }
+
+  async uploadThumbnail(formData) {
+    const url = `${this.baseURL}/upload/thumbnail`;
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+
+      xhr.addEventListener('load', () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const response = JSON.parse(xhr.responseText);
+            resolve(response);
+          } catch (error) {
+            reject(new Error('Invalid response from server'));
+          }
+        } else {
+          try {
+            const error = JSON.parse(xhr.responseText);
+            reject(new Error(error.error || 'Upload failed'));
+          } catch {
+            reject(new Error('Upload failed'));
+          }
+        }
+      });
+
+      xhr.addEventListener('error', () => {
+        reject(new Error('Network error during upload'));
+      });
+
+      xhr.open('POST', url);
+      if (this.token) {
+        xhr.setRequestHeader('Authorization', `Bearer ${this.token}`);
+      }
+      xhr.send(formData);
+    });
   }
 }
 

@@ -36,6 +36,12 @@
   cursor: pointer;
 }
 
+.video-element::poster {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
 .video-placeholder {
   position: absolute;
   top: 0;
