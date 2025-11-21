@@ -15,11 +15,11 @@ router.use(requireAdmin);
 
 // GET /api/admin/stats - Get platform statistics
 router.get('/stats', asyncHandler(async (req, res) => {
-  const videos = videoDb.getAll();
-  const comments = commentDb.getAll();
-  const channels = channelDb.getAll();
-  const users = userDb.getAll();
-  const playlists = playlistDb.getAll();
+  const videos = await videoDb.getAll();
+  const comments = await commentDb.getAll();
+  const channels = await channelDb.getAll();
+  const users = await userDb.getAll();
+  const playlists = await playlistDb.getAll();
 
   const stats = {
     totalVideos: videos.length,
@@ -46,7 +46,7 @@ router.get('/stats', asyncHandler(async (req, res) => {
 // GET /api/admin/videos - Get all videos with pagination
 router.get('/videos', asyncHandler(async (req, res) => {
   const { page = 1, limit = 20, search = '' } = req.query;
-  let videos = videoDb.getAll();
+  let videos = await videoDb.getAll();
 
   // Filter by search term if provided
   if (search) {
@@ -82,20 +82,20 @@ router.get('/videos', asyncHandler(async (req, res) => {
 // DELETE /api/admin/videos/:id - Delete a video
 router.delete('/videos/:id', asyncHandler(async (req, res) => {
   const videoId = req.params.id;
-  const video = videoDb.findById(videoId);
+  const video = await videoDb.findById(videoId);
 
   if (!video) {
     return res.status(404).json({ error: 'Video not found' });
   }
 
   // Delete associated comments
-  const comments = commentDb.findBy('videoId', videoId);
-  comments.forEach(comment => {
-    commentDb.delete(comment.id);
-  });
+  const comments = await commentDb.findBy('videoId', videoId);
+  for (const comment of comments) {
+    await commentDb.delete(comment.id);
+  }
 
   // Delete the video
-  const deleted = videoDb.delete(videoId);
+  const deleted = await videoDb.delete(videoId);
 
   if (deleted) {
     res.json({ message: 'Video deleted successfully', videoId });
@@ -107,7 +107,7 @@ router.delete('/videos/:id', asyncHandler(async (req, res) => {
 // GET /api/admin/users - Get all users
 router.get('/users', asyncHandler(async (req, res) => {
   const { page = 1, limit = 20, search = '' } = req.query;
-  let users = userDb.getAll();
+  let users = await userDb.getAll();
 
   // Filter by search term if provided
   if (search) {
@@ -151,20 +151,21 @@ router.put('/users/:id/role', asyncHandler(async (req, res) => {
     return res.status(400).json({ error: 'Invalid role. Must be "admin" or "user"' });
   }
 
-  const user = userDb.findById(userId);
+  const user = await userDb.findById(userId);
   if (!user) {
     return res.status(404).json({ error: 'User not found' });
   }
 
   // Prevent removing last admin
   if (role === 'user' && user.role === 'admin') {
-    const admins = userDb.getAll().filter(u => u.role === 'admin');
+    const allUsers = await userDb.getAll();
+    const admins = allUsers.filter(u => u.role === 'admin');
     if (admins.length === 1) {
       return res.status(400).json({ error: 'Cannot remove the last admin' });
     }
   }
 
-  const updated = userDb.update(userId, { role });
+  const updated = await userDb.update(userId, { role });
   const { password, ...userData } = updated;
 
   res.json({ message: 'User role updated successfully', user: userData });
@@ -173,7 +174,7 @@ router.put('/users/:id/role', asyncHandler(async (req, res) => {
 // DELETE /api/admin/users/:id - Delete a user
 router.delete('/users/:id', asyncHandler(async (req, res) => {
   const userId = req.params.id;
-  const user = userDb.findById(userId);
+  const user = await userDb.findById(userId);
 
   if (!user) {
     return res.status(404).json({ error: 'User not found' });
@@ -181,13 +182,14 @@ router.delete('/users/:id', asyncHandler(async (req, res) => {
 
   // Prevent deleting last admin
   if (user.role === 'admin') {
-    const admins = userDb.getAll().filter(u => u.role === 'admin');
+    const allUsers = await userDb.getAll();
+    const admins = allUsers.filter(u => u.role === 'admin');
     if (admins.length === 1) {
       return res.status(400).json({ error: 'Cannot delete the last admin' });
     }
   }
 
-  const deleted = userDb.delete(userId);
+  const deleted = await userDb.delete(userId);
 
   if (deleted) {
     res.json({ message: 'User deleted successfully', userId });
@@ -199,7 +201,7 @@ router.delete('/users/:id', asyncHandler(async (req, res) => {
 // GET /api/admin/comments - Get all comments
 router.get('/comments', asyncHandler(async (req, res) => {
   const { page = 1, limit = 20, videoId } = req.query;
-  let comments = commentDb.getAll();
+  let comments = await commentDb.getAll();
 
   // Filter by videoId if provided
   if (videoId) {
@@ -230,13 +232,13 @@ router.get('/comments', asyncHandler(async (req, res) => {
 // DELETE /api/admin/comments/:id - Delete a comment
 router.delete('/comments/:id', asyncHandler(async (req, res) => {
   const commentId = req.params.id;
-  const comment = commentDb.findById(commentId);
+  const comment = await commentDb.findById(commentId);
 
   if (!comment) {
     return res.status(404).json({ error: 'Comment not found' });
   }
 
-  const deleted = commentDb.delete(commentId);
+  const deleted = await commentDb.delete(commentId);
 
   if (deleted) {
     res.json({ message: 'Comment deleted successfully', commentId });

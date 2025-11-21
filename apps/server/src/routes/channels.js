@@ -7,27 +7,19 @@ const channelDb = new Database('channels');
 const subscriptionDb = new Database('subscriptions');
 
 // GET /api/channels - Get all channels
-router.get('/', (req, res) => {
-  try {
-    const channels = channelDb.getAll();
-    res.json({ channels });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+router.get('/', asyncHandler(async (req, res) => {
+  const channels = await channelDb.getAll();
+  res.json({ channels });
+}));
 
 // GET /api/channels/:id - Get channel by ID
-router.get('/:id', (req, res) => {
-  try {
-    const channel = channelDb.findById(req.params.id);
-    if (!channel) {
-      return res.status(404).json({ error: 'Channel not found' });
-    }
-    res.json(channel);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+router.get('/:id', asyncHandler(async (req, res) => {
+  const channel = await channelDb.findById(req.params.id);
+  if (!channel) {
+    return res.status(404).json({ error: 'Channel not found' });
   }
-});
+  res.json(channel);
+}));
 
 // POST /api/channels - Create new channel
 router.post('/', validateChannel, asyncHandler(async (req, res) => {
@@ -36,12 +28,12 @@ router.post('/', validateChannel, asyncHandler(async (req, res) => {
     const channelId = name.toLowerCase().replace(/\s+/g, '-');
     
     // Check if channel already exists
-    const existing = channelDb.findById(channelId);
+    const existing = await channelDb.findById(channelId);
     if (existing) {
       return res.status(400).json({ error: 'Channel already exists' });
     }
 
-    const channel = channelDb.create({
+    const channel = await channelDb.create({
       id: channelId,
       name: name.trim(),
       description: (description || '').trim(),
@@ -56,43 +48,34 @@ router.post('/', validateChannel, asyncHandler(async (req, res) => {
 }));
 
 // PUT /api/channels/:id - Update channel
-router.put('/:id', (req, res) => {
-  try {
-    const channel = channelDb.findById(req.params.id);
-    if (!channel) {
-      return res.status(404).json({ error: 'Channel not found' });
-    }
-
-    const updates = req.body;
-    const updated = channelDb.update(channel.id, updates);
-
-    res.json(updated);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+router.put('/:id', asyncHandler(async (req, res) => {
+  const channel = await channelDb.findById(req.params.id);
+  if (!channel) {
+    return res.status(404).json({ error: 'Channel not found' });
   }
-});
+
+  const updates = req.body;
+  const updated = await channelDb.update(channel.id, updates);
+
+  res.json(updated);
+}));
 
 // DELETE /api/channels/:id - Delete channel
-router.delete('/:id', (req, res) => {
-  try {
-    const channel = channelDb.findById(req.params.id);
-    if (!channel) {
-      return res.status(404).json({ error: 'Channel not found' });
-    }
-
-    channelDb.delete(channel.id);
-    res.json({ message: 'Channel deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+router.delete('/:id', asyncHandler(async (req, res) => {
+  const channel = await channelDb.findById(req.params.id);
+  if (!channel) {
+    return res.status(404).json({ error: 'Channel not found' });
   }
-});
+
+  await channelDb.delete(channel.id);
+  res.json({ message: 'Channel deleted successfully' });
+}));
 
 // GET /api/channels/:id/videos - Get videos for a channel
 router.get('/:id/videos', validatePagination, asyncHandler(async (req, res) => {
-  try {
-    const { limit = 20, offset = 0, page = 1 } = req.query;
-    const videoDb = new Database('videos');
-    let videos = videoDb.findBy('channelId', req.params.id);
+  const { limit = 20, offset = 0, page = 1 } = req.query;
+  const videoDb = new Database('videos');
+  let videos = await videoDb.findBy('channelId', req.params.id);
     
     videos.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     

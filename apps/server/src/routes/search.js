@@ -20,7 +20,7 @@ router.get('/', validateSearch, asyncHandler(async (req, res) => {
 
     if (type === 'all' || type === 'videos') {
       const videoDb = new Database('videos');
-      const videos = videoDb.getAll();
+      const videos = await videoDb.getAll();
       
       const filteredVideos = videos.filter(video => {
         const titleMatch = video.title?.toLowerCase().includes(query);
@@ -36,7 +36,7 @@ router.get('/', validateSearch, asyncHandler(async (req, res) => {
 
     if (type === 'all' || type === 'channels') {
       const channelDb = new Database('channels');
-      const channels = channelDb.getAll();
+      const channels = await channelDb.getAll();
       
       const filteredChannels = channels.filter(channel => {
         const nameMatch = channel.name?.toLowerCase().includes(query);
@@ -50,7 +50,7 @@ router.get('/', validateSearch, asyncHandler(async (req, res) => {
 
     if (type === 'all' || type === 'playlists') {
       const playlistDb = new Database('playlists');
-      const playlists = playlistDb.getAll();
+      const playlists = await playlistDb.getAll();
       
       const filteredPlaylists = playlists.filter(playlist => {
         const nameMatch = playlist.name?.toLowerCase().includes(query);
